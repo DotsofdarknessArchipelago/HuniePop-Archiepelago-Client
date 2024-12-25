@@ -32,7 +32,7 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static void puzzleautocomplete(PuzzleGame __instance)
         {
-            __instance.SetResourceValue(PuzzleGameResourceType.AFFECTION, 9999, true);
+            //__instance.SetResourceValue(PuzzleGameResourceType.AFFECTION, 9999, true);
         }
 
 
