@@ -19,7 +19,6 @@ namespace HuniePopArchiepelagoClient.Archipelago
         private bool attemptingConnection;
 
         public static ArchipelagoData ServerData = new();
-        private DeathLinkHandler DeathLinkHandler;
         private ArchipelagoSession session;
 
         /// <summary>
@@ -95,7 +94,6 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 ServerData.SetupSession(success.SlotData, session.RoomState.Seed);
                 Authenticated = true;
 
-                DeathLinkHandler = new(session.CreateDeathLinkService(), ServerData.SlotName);
                 session.Locations.CompleteLocationChecksAsync(null, ServerData.CheckedLocations.ToArray());
                 outText = $"Successfully connected to {ServerData.Uri} as {ServerData.SlotName}!";
 
