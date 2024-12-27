@@ -66,7 +66,7 @@ namespace HuniePopArchiepelagoClient.Utils
             //}
 
             // draw client/server commands entry
-            if (Hidden || !CursedArchipelagoClient.Authenticated) return;
+            if (Hidden || !Plugin.curse.Authenticated) return;
 
             CommandText = GUI.TextField(CommandTextRect, CommandText);
             if (!CommandText.IsNullOrWhiteSpace() && GUI.Button(SendCommandButton, "Send"))

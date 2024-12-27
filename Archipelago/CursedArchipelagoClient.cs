@@ -21,6 +21,8 @@ using HuniePopArchiepelagoClient.Utils;
 using static System.Collections.Specialized.BitVector32;
 using System.IO;
 using System.Text;
+using System.Net.Configuration;
+using System.Net.Sockets;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -30,10 +32,13 @@ namespace HuniePopArchiepelagoClient.Archipelago
     public class CursedArchipelagoClient
     {
 
+        public static callback myCallBack = new callback(tmp);
+
         static readonly ArchipelagoPacketConverter Converter = new ArchipelagoPacketConverter();
         public RoomInfoPacket roominfo;
         public ConnectedPacket connected;
         public string seed = "";
+        public string error = null;
 
         public const string APVersion = "0.5.0";
         private const string Game = "Hunie Pop";
@@ -42,17 +47,18 @@ namespace HuniePopArchiepelagoClient.Archipelago
         string username;
         string password;
 
-        public static bool Authenticated = false;
+        public bool Authenticated = false;
         public bool working = false;
+        public bool fullconnect = false;
 
         public static ArchipelageItemList alist = new ArchipelageItemList();
 
-        IntPtr ws;
+        public IntPtr ws;
 
         public void setup(string h, string u, string p)
         {
-            url = h;
-            username = u;
+            url = h.Trim();
+            username = u.Trim();
             password = p;
 
             if (!url.StartsWith("ws://") && !url.StartsWith("wss://"))
@@ -61,12 +67,9 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 return;
             }
 
-            callback myCallBack = new callback(msgCallback);
-
             ws = helper.getWS();
             helper.seturlWS(ws, url);
             helper.setcallWS(ws, myCallBack);
-
 
         }
 
@@ -76,6 +79,11 @@ namespace HuniePopArchiepelagoClient.Archipelago
             if (helper.readyWS(ws)) { return; }
             if (!url.StartsWith("ws://") && !url.StartsWith("wss://")) { return; }
             helper.startWS(ws);
+        }
+
+        public static void tmp(string g)
+        {
+
         }
 
         public void sendConnectPacket()
@@ -201,31 +209,75 @@ namespace HuniePopArchiepelagoClient.Archipelago
             }
         }
 
+        public static void connerror(ConnectionRefusedPacket msg)
+        {
+            ArchipelagoConsole.LogMessage("CONNECTION TO ARCHIPELAGO SERVER REFUSED WITH ERRORS:");
+            for (int i = 0; i < msg.Errors.Length; i++)
+            {
+                switch (msg.Errors[i])
+                {
+                    case ConnectionRefusedError.InvalidSlot:
+                        ArchipelagoConsole.LogMessage("ERROR: NAME DID NOT MATCH ANY NAMES ON SERVER");
+                        break;
+                    case ConnectionRefusedError.InvalidGame:
+                        ArchipelagoConsole.LogMessage("ERROR: NAME IS CORRECT BUT GAME ASSOIATED WITH IT IS WRONG");
+                        break;
+                    case ConnectionRefusedError.SlotAlreadyTaken:
+                        ArchipelagoConsole.LogMessage("ERROR: CONNECTION TO THIS SLOT IS ALREADY ESTABLISHED");
+                        break;
+                    case ConnectionRefusedError.IncompatibleVersion:
+                        ArchipelagoConsole.LogMessage("ERROR: VERSION MISSMATCH");
+                        break;
+                    case ConnectionRefusedError.InvalidPassword:
+                        ArchipelagoConsole.LogMessage("ERROR: PASSWORD IS WRONG");
+                        break;
+                    case ConnectionRefusedError.InvalidItemsHandling:
+                        ArchipelagoConsole.LogMessage("ERROR: ITEM HANDLING FLAGS ARE WRONG");
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+
+            foreach (ConnectionRefusedError error in msg.Errors)
+            {
+            }
+        }
+
         public static void msgCallback(string msg)
         {
+            //ArchipelagoConsole.LogMessage($"{msg}");
             if (!msg.StartsWith("{") && !msg.StartsWith("["))
             {
                 ArchipelagoConsole.LogMessage(msg);
+                Plugin.curse.error = msg;
                 return;
             }
-            List<ArchipelagoPacketBase> packets = null;
+            ArchipelagoPacketBase packet = null;
 
-            packets = JsonConvert.DeserializeObject<List<ArchipelagoPacketBase>>(msg, Converter);
+            packet = JsonConvert.DeserializeObject<ArchipelagoPacketBase>(msg, Converter);
 
-            if (packets != null)
-                foreach (var packet in packets)
-                {
+            if (packet != null)
+                    //DEBUG PACKET CODE
+                    Plugin.BepinLogger.LogMessage(JsonConvert.SerializeObject(packet));
                     if (packet is RoomInfoPacket)
                     {
                         Plugin.curse.roominfo = (RoomInfoPacket)packet;
                     }
                     else if (packet is ConnectionRefusedPacket)
                     {
+                        connerror((ConnectionRefusedPacket)packet);
+                        Plugin.curse.Authenticated = false;
+                        Plugin.curse.working = false;
+                        Plugin.curse.fullconnect = false;
+                        Plugin.tringtoconnect = false;
+                        Plugin.connectstage = 0;
                     }
                     else if (packet is ConnectedPacket)
                     {
                         Plugin.curse.connected = (ConnectedPacket)packet;
-                        Authenticated = true;
+                        Plugin.curse.Authenticated = true;
                         Plugin.curse.setupdata();
                     }
                     else if (packet is ReceivedItemsPacket)
@@ -235,10 +287,10 @@ namespace HuniePopArchiepelagoClient.Archipelago
                         {
                             alist.add(item);
                         }
-                        if (!Plugin.curse.working) 
+                        if (!Plugin.curse.fullconnect) 
                         {
                             Plugin.BepinLogger.LogMessage("recieved an item so everything look like its working");
-                            Plugin.curse.working = true; 
+                            Plugin.curse.fullconnect = true; 
                         }
                     }
                     else if (packet is LocationInfoPacket)
@@ -263,7 +315,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                     else if (packet is SetReplyPacket)
                     {
                     }
-                }
+                
         }
 
         public static void printJSON(PrintJsonPacket packet)
@@ -400,7 +452,13 @@ namespace HuniePopArchiepelagoClient.Archipelago
         [DllImport("DotsWebSocket.dll")]
         public static extern bool readyWS(IntPtr ws);
 
+        [DllImport("DotsWebSocket.dll")]
+        public static extern bool hasmsg(IntPtr ws);
 
-        
+        [DllImport("DotsWebSocket.dll")]
+        [return: MarshalAs(UnmanagedType.BStr)]
+        public static extern string getmsg(IntPtr ws);
+
+
     }
 }
