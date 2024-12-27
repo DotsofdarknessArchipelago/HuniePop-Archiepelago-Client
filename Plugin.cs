@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security;
 using System.Threading;
 using BepInEx;
@@ -14,7 +15,7 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.2.3";
+        public const string PluginVersion = "0.2.4";
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         private const string APDisplayInfo = $"Archipelago v{PluginVersion}";
@@ -42,10 +43,14 @@ namespace HuniePopArchiepelagoClient
         }
         void Update()
         {
-            if (tringtoconnect && helper.hasmsg(curse.ws))
+            try
             {
-                CursedArchipelagoClient.msgCallback(helper.getmsg(curse.ws));
+                if (tringtoconnect && helper.hasmsg(curse.ws))
+                {
+                    CursedArchipelagoClient.msgCallback(helper.getmsg(curse.ws));
+                }
             }
+            catch { }
             if (Input.GetKeyDown(KeyCode.F8))
             {
                 ArchipelagoConsole.toggle();
@@ -110,9 +115,20 @@ namespace HuniePopArchiepelagoClient
                 // requires that the player at least puts *something* in the slot name
                 if (GUI.Button(new Rect(Screen.width - 200, 105, 100, 20), "Connect") && !name.IsNullOrWhiteSpace())
                 {
-                    tringtoconnect = true;
-                    curse.setup(playeruri, playername, playerpass);
-                    curse.connect();
+                    try
+                    {
+                        tringtoconnect = true;
+                        curse.setup(playeruri, playername, playerpass);
+                        curse.connect();
+                    }
+                    catch (Exception e)
+                    {
+                        ArchipelagoConsole.LogMessage("FATAL ERROR: DotsWebSocket.dll not found");
+                        if (File.Exists("DotsWebSocket.dll"))
+                        {
+                            ArchipelagoConsole.LogMessage("DotsWebSocket.dll exists but client not seeing it properly try restarting your game");
+                        }
+                    }
                     //Thread.Sleep(1000);
                     //curse.sendConnectPacket();
                     //ArchipelagoClient.ServerData.Uri = playeruri.Trim();
