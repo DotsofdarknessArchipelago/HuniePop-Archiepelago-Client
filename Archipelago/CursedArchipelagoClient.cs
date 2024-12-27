@@ -76,7 +76,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public void connect()
         {
             if (ws == null || url == null || username == null) { return; }
-            if (helper.readyWS(ws)) { return; }
+            if (helper.readyWS(ws) == 3) { return; }
             if (!url.StartsWith("ws://") && !url.StartsWith("wss://")) { return; }
             helper.startWS(ws);
         }
@@ -88,7 +88,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
         public void sendConnectPacket()
         {
-            if (!helper.readyWS(ws)) { return; }
+            if (helper.readyWS(ws)!=3) { return; }
             ConnectPacket packet = new ConnectPacket();
             packet.Game = Game;
             packet.Name = username;
@@ -450,7 +450,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public static extern void sendWS(IntPtr ws, string msg);
 
         [DllImport("DotsWebSocket.dll")]
-        public static extern bool readyWS(IntPtr ws);
+        public static extern int readyWS(IntPtr ws);
 
         [DllImport("DotsWebSocket.dll")]
         public static extern bool hasmsg(IntPtr ws);

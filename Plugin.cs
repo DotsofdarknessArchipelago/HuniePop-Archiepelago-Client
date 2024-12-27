@@ -14,7 +14,7 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.2.2";
+        public const string PluginVersion = "0.2.3";
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         private const string APDisplayInfo = $"Archipelago v{PluginVersion}";
@@ -74,7 +74,7 @@ namespace HuniePopArchiepelagoClient
             {
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 140), "");
                 GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "-trying to connect to server");
-                if (helper.readyWS(curse.ws))
+                if (helper.readyWS(curse.ws)==3)
                 {
                     GUI.Label(new Rect(Screen.width - 295, 40, 300, 20), "-initial server connection established");
                     GUI.Label(new Rect(Screen.width - 295, 60, 300, 20), "-sending archipelago connect packet");
@@ -85,6 +85,10 @@ namespace HuniePopArchiepelagoClient
                     GUI.Label(new Rect(Screen.width - 295, 80, 300, 20), "-connection to archipelago server established");
                     GUI.Label(new Rect(Screen.width - 295, 100, 300, 20), "-waiting on geting a packet to know if connection");
                     GUI.Label(new Rect(Screen.width - 295, 120, 300, 20), "is fully working");
+                }
+                if (helper.readyWS(curse.ws) == 2)
+                {
+                    if (GUI.Button(new Rect(Screen.width - 200, 120, 100, 20), "RESET")) { tringtoconnect = false; }
                 }
             }
             else
