@@ -162,7 +162,7 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static bool newgirloveride(ref int ____saveFileIndex)
         {
-            if (!Plugin.curse.working && Plugin.curse.Authenticated)
+            if (!Plugin.curse.fullconnect)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false; 
@@ -206,7 +206,7 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool newguyoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.working && Plugin.curse.Authenticated)
+            if (!Plugin.curse.fullconnect)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false;
@@ -251,7 +251,7 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool continueoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.working && Plugin.curse.Authenticated)
+            if (!Plugin.curse.fullconnect)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false;
