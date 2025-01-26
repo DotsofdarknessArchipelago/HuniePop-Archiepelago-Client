@@ -184,6 +184,19 @@ namespace HuniePopArchiepelagoClient.Utils
 
                 saveFile.tutorialStep = 10;
 
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
+                
                 saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.SlotData["start_girl"]);
                 saveFile.currentLocation = 22;
 
@@ -227,6 +240,19 @@ namespace HuniePopArchiepelagoClient.Utils
                 saveFile.endingSceneShown = true;
 
                 saveFile.tutorialStep = 10;
+
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
 
                 saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.SlotData["start_girl"]);
                 saveFile.currentLocation = 22;
@@ -506,22 +532,42 @@ namespace HuniePopArchiepelagoClient.Utils
                 if (item.Id > 42069000 && item.Id < 42069013)
                 {
                     //PANTIES ITEMS
+
+                    if (player.pantiesTurnedIn.Contains(archidtoitemid(item.Id)))
+                    {
+                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " already turned in skipping");
+                        item.processed = true;
+                        continue;
+                    }
+
+                    if (player.HasItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)))){
+                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " already in inventory skipping");
+                        item.processed = true;
+                        continue;
+                    }
+
                     if (!player.IsInventoryFull())
                     {
-                        ArchipelagoConsole.LogMessage("panties recieved");
-                        player.AddItem(GameManager.Data.Items.Get((int)item.Id - 42069001 + 277), player.inventory, false, false);
+                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " recieved");
+                        player.AddItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)), player.inventory, false, false);
                         item.processed = true;
                     }
                 }
                 else if (item.Id > 42069012 && item.Id < 42069025)
                 {
                     //GIRL UNLOCKS
-                    ArchipelagoConsole.LogMessage("girl unlocked");
                     int girlid = (int)item.Id - 42069012;
                     for (int j = 0; j < player.girls.Count; j++)
                     {
                         if (player.girls[j].GetGirlDefinition().id == girlid)
                         {
+                            if (player.girls[j].metStatus == GirlMetStatus.MET)
+                            {
+                                ArchipelagoConsole.LogMessage(player.girls[j].GetGirlDefinition().name + " already unlocked skipping");
+                                item.processed = true;
+                                break;
+                            }
+                            ArchipelagoConsole.LogMessage(player.girls[j].GetGirlDefinition().name + " unlocked");
                             player.girls[j].metStatus = GirlMetStatus.MET;
                             item.processed = true;
                             break;
@@ -531,20 +577,20 @@ namespace HuniePopArchiepelagoClient.Utils
                 else if (item.Id > 42069024 && item.Id < 42069097)
                 {
                     //GIFT ITEMS
-                    ArchipelagoConsole.LogMessage("gift item recieved");
                     if (!player.IsInventoryFull())
                     {
-                        player.AddItem(GameManager.Data.Items.Get((int)item.Id - 42069025 + 49), player.inventory, false, false);
+                        player.AddItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)), player.inventory, false, false);
+                        ArchipelagoConsole.LogMessage(GameManager.Data.Items.Get(archidtoitemid(item.Id)).name + " recieved");
                         item.processed = true;
                     }
                 }
                 else if (item.Id > 42069096 && item.Id < 42069169)
                 {
                     //UNIQUE GIFT ITEMS
-                    ArchipelagoConsole.LogMessage("unique gift item recieved");
                     if (!player.IsInventoryFull())
                     {
-                        player.AddItem(GameManager.Data.Items.Get((int)item.Id - 42069097 + 193), player.inventory, false, false);
+                        player.AddItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)), player.inventory, false, false);
+                        ArchipelagoConsole.LogMessage(GameManager.Data.Items.Get(archidtoitemid(item.Id)).name + " recieved");
                         item.processed = true;
                     }
                 }

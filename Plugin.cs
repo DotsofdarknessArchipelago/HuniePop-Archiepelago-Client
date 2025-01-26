@@ -15,7 +15,7 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.2.6";
+        public const string PluginVersion = "0.3.0";
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         private const string APDisplayInfo = $"Archipelago v{PluginVersion}";
@@ -29,6 +29,7 @@ namespace HuniePopArchiepelagoClient
 
         public static bool tringtoconnect = false;
         public static int connectstage = 0;
+        bool dll;
 
         private void Awake()
         {
@@ -37,20 +38,36 @@ namespace HuniePopArchiepelagoClient
             curse = new CursedArchipelagoClient();
             ArchipelagoConsole.Awake();
 
-            ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
             Patches.patch(curse);
-            ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
+
+            try
+            {
+                ArchipelagoConsole.LogMessage("DotsWebsocket.dll version:" + helper.dotsV().ToString());
+                ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
+                dll = true;
+            }
+            catch (Exception e)
+            {
+                dll = false;
+                ArchipelagoConsole.LogMessage("FATAL ERROR: DotsWebSocket.dll not found");
+                if (File.Exists("DotsWebSocket.dll"))
+                {
+                    ArchipelagoConsole.Hidden = true;
+                    ArchipelagoConsole.toggle();
+                    ArchipelagoConsole.LogMessage("DotsWebSocket.dll exists but errored on client.\nmake sure you have \"Microsoft Visual C++ Redistributable x86\" version greater than 14.42.34433.0 installed.\nPermalink to latest: https://aka.ms/vs/17/release/vc_redist.x86.exe");
+                }
+            }
+
         }
         void Update()
         {
-            try
+            if (dll)
             {
                 if (tringtoconnect && helper.hasmsg(curse.ws))
                 {
                     CursedArchipelagoClient.msgCallback(helper.getmsg(curse.ws));
                 }
             }
-            catch { }
             if (Input.GetKeyDown(KeyCode.F8))
             {
                 ArchipelagoConsole.toggle();
@@ -115,19 +132,11 @@ namespace HuniePopArchiepelagoClient
                 // requires that the player at least puts *something* in the slot name
                 if (GUI.Button(new Rect(Screen.width - 200, 105, 100, 20), "Connect") && !name.IsNullOrWhiteSpace())
                 {
-                    try
+                    if (dll)
                     {
                         tringtoconnect = true;
                         curse.setup(playeruri, playername, playerpass);
                         curse.connect();
-                    }
-                    catch (Exception e)
-                    {
-                        ArchipelagoConsole.LogMessage("FATAL ERROR: DotsWebSocket.dll not found");
-                        if (File.Exists("DotsWebSocket.dll"))
-                        {
-                            ArchipelagoConsole.LogMessage("DotsWebSocket.dll exists but client not seeing it properly try restarting your game");
-                        }
                     }
                     //Thread.Sleep(1000);
                     //curse.sendConnectPacket();

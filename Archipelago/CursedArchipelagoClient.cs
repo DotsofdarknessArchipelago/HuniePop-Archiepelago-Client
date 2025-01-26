@@ -434,28 +434,31 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public static extern int MessageBox(IntPtr hWnd, string lpText, string lpCaption, uint uType);
 
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern IntPtr getWS();
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern void startWS(IntPtr ws);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern void seturlWS(IntPtr ws, string url);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern void setcallWS(IntPtr ws, callback call);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern void sendWS(IntPtr ws, string msg);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern int readyWS(IntPtr ws);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
+        public static extern int dotsV();
+
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern bool hasmsg(IntPtr ws);
 
-        [DllImport("DotsWebSocket.dll")]
+        [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         [return: MarshalAs(UnmanagedType.BStr)]
         public static extern string getmsg(IntPtr ws);
 
