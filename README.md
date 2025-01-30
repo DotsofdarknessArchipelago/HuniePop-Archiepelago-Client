@@ -14,6 +14,7 @@ BACKUP YOUR SAVE FILE BEFORE USING THIS AS I CANT GUARANTEE THAT IT WILL NOT COR
 INSTALLATION INSTRUCTIONS:
 
 - Have Hunie Pop Installed
+- Download/install "Microsoft Visual C++ Redistributable x86" version 14.42.34433.0 or greater [link](https://aka.ms/vs/17/release/vc_redist.x86.exe)
 - Download BepInEx ([link](https://github.com/BepInEx/BepInEx/releases))(<b><ins>x86 version</ins>(32bit) x64 will not work</b>)(V5.4.23.2 recommend)(<b>THIS WILL NOT WORK ON BepInEX V6</b>)
 - Download Hunie Pop Archipelago plugin (See Releases for latest version)
 - Extract and copy the contents of BepInEx to the directory where "HuniePop.exe" is
