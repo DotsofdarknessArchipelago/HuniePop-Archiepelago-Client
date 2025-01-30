@@ -1,28 +1,14 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Archipelago.MultiClient.Net.Models;
-using static UnityEngine.Application;
-using WebSocketSharp;
-using Archipelago.MultiClient.Net.Packets;
 using Newtonsoft.Json;
-using System.Security.Principal;
-using Archipelago.MultiClient.Net;
 using System.Collections.Generic;
-using Archipelago.MultiClient.Net.Converters;
-using Archipelago.MultiClient.Net.Enums;
 using UnityEngine;
-using System.Threading;
 using System.Linq;
-using Archipelago.MultiClient.Net.MessageLog.Messages;
-using tk2dRuntime.TileMap;
-using Archipelago.MultiClient.Net.MessageLog.Parts;
-using System.Runtime.Remoting.Lifetime;
-using HuniePopArchiepelagoClient.Utils;
-using static System.Collections.Specialized.BitVector32;
 using System.IO;
-using System.Text;
-using System.Net.Configuration;
-using System.Net.Sockets;
+using Newtonsoft.Json.Linq;
+using HuniePopArchiepelagoClient.ArchipelagoPackets;
+using HuniePopArchiepelagoClient.Utils;
+using System.Security.Principal;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -34,9 +20,10 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
         public static callback myCallBack = new callback(tmp);
 
-        static readonly ArchipelagoPacketConverter Converter = new ArchipelagoPacketConverter();
-        public RoomInfoPacket roominfo;
+        public RoomInfoPacket room;
+        public DataPackagePacket data;
         public ConnectedPacket connected;
+
         public string seed = "";
         public string error = null;
 
@@ -47,9 +34,15 @@ namespace HuniePopArchiepelagoClient.Archipelago
         string username;
         string password;
 
-        public bool Authenticated = false;
-        public bool working = false;
-        public bool fullconnect = false;
+        public bool recievedroominfo = false;
+        public bool sendroomdatapackage = false;
+        public bool recievedroomdatapackage = false;
+        public bool processedroomdatapackage = false;
+        public bool startprocessedroomdatapackage = false;
+        public bool processeddatapackage = false;
+        public bool sentconnectedpacket = false;
+        public bool recievedconnectedpacket = false;
+        public bool fullconnection = false;
 
         public static ArchipelageItemList alist = new ArchipelageItemList();
 
@@ -88,17 +81,21 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
         public void sendConnectPacket()
         {
-            if (helper.readyWS(ws)!=3) { return; }
-            ConnectPacket packet = new ConnectPacket();
-            packet.Game = Game;
-            packet.Name = username;
-            packet.Password = password;
-            packet.Uuid = Guid.NewGuid().ToString();
-            packet.Version = new NetworkVersion(new Version(APVersion));
-            packet.Tags = ["AP"];
-            packet.ItemsHandling = ItemsHandlingFlags.AllItems;
-            packet.RequestSlotData = true;
-            helper.sendWS(ws, JsonConvert.SerializeObject(packet));
+            if (helper.readyWS(ws) != 3) { return; }
+            string pack = "{\"cmd\":\"Connect\",\"game\":\"" + Game + "\",\"name\":\"" + username + "\",\"password\":\"" + password + "\",\"uuid\":\"" + Guid.NewGuid().ToString() + "\",\"version\":{\"major\":0,\"minor\":5,\"build\":1,\"class\":\"Version\"},\"tags\":[\"AP\"],\"items_handling\":7,\"slot_data\":true}";
+            helper.sendWS(ws, pack);
+        }
+
+        public void sendGetPackage()
+        {
+            if (helper.readyWS(ws) != 3) { return; }
+            string games = "";
+            for (int i = 0; i < room.games.Count(); i++)
+            {
+                if (i == 0) { games = "\""+room.games[i]+"\""; continue; }
+                games += ",\"" + room.games[i] + "\"";
+            }
+            helper.sendWS(ws, "{\"cmd\":\"GetDataPackage\", \"games\":[" + games + "]}");
         }
 
         public void sendJson(string json)
@@ -146,37 +143,68 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 CursedArchipelagoClient.alist = new ArchipelageItemList();
                 sendJson("{\"cmd\":" + "\"Sync\"}");
             }
-            if (msg == "$giftids")
+            if (msg == "$items")
             {
-                List<ItemDefinition> list;
-                list = GameManager.Data.Items.GetAllOfType(ItemType.GIFT, false);
+                List<ItemDefinition> list = GameManager.Data.Items.GetAllOfType(ItemType.FOOD, false);
+                List<ItemDefinition> list2 = GameManager.Data.Items.GetAllOfType(ItemType.DRINK, false);
+                List<ItemDefinition> list3 = GameManager.Data.Items.GetAllOfType(ItemType.GIFT, false);
+                List<ItemDefinition> list4 = GameManager.Data.Items.GetAllOfType(ItemType.UNIQUE_GIFT, false);
+                List<ItemDefinition> list5 = GameManager.Data.Items.GetAllOfType(ItemType.DATE_GIFT, false);
+                List<ItemDefinition> list6 = GameManager.Data.Items.GetAllOfType(ItemType.ACCESSORY, false);
+                List<ItemDefinition> list7 = GameManager.Data.Items.GetAllOfType(ItemType.PANTIES, false);
+                List<ItemDefinition> list8 = GameManager.Data.Items.GetAllOfType(ItemType.PRESENT, false);
+                List<ItemDefinition> list9 = GameManager.Data.Items.GetAllOfType(ItemType.MISC, false);
+                ArchipelagoConsole.LogMessage("-------FOOD DATA-------");
+                foreach(ItemDefinition i in list)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
+                ArchipelagoConsole.LogMessage("-------DRINK DATA-------");
+                foreach (ItemDefinition i in list2)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
                 ArchipelagoConsole.LogMessage("-------GIFT DATA-------");
-                for (int i = 0; i < list.Count; i++)
+                foreach (ItemDefinition i in list3)
                 {
-                    ArchipelagoConsole.LogMessage("ITEM ID:" + list[i].id + " | ITEM NAME:" + list[i].name);
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
                 }
-                List<ItemDefinition> list2;
-                list2 = GameManager.Data.Items.GetAllOfType(ItemType.UNIQUE_GIFT, false);
-                ArchipelagoConsole.LogMessage("-------UNIQUE GIFT DATA-------");
-                for (int i = 0; i < list2.Count; i++)
+                ArchipelagoConsole.LogMessage("-------UNIQUE_GIFT DATA-------");
+                foreach (ItemDefinition i in list4)
                 {
-                    ArchipelagoConsole.LogMessage("ITEM ID:" + list2[i].id + " | ITEM NAME:" + list2[i].name);
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
                 }
-                List<ItemDefinition> list3;
-                list3 = GameManager.Data.Items.GetAllOfType(ItemType.PANTIES, false);
+                ArchipelagoConsole.LogMessage("-------DATE_GIFT DATA-------");
+                foreach (ItemDefinition i in list5)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
+                ArchipelagoConsole.LogMessage("-------ACCESSORY DATA-------");
+                foreach (ItemDefinition i in list6)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
                 ArchipelagoConsole.LogMessage("-------PANTIES DATA-------");
-                for (int i = 0; i < list3.Count; i++)
+                foreach (ItemDefinition i in list7)
                 {
-                    ArchipelagoConsole.LogMessage("ITEM ID:" + list3[i].id + " | ITEM NAME:" + list3[i].name);
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
+                ArchipelagoConsole.LogMessage("-------PRESENT DATA-------");
+                foreach (ItemDefinition i in list8)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
+                }
+                ArchipelagoConsole.LogMessage("-------MISC DATA-------");
+                foreach (ItemDefinition i in list9)
+                {
+                    ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
                 }
             }
         }
 
         public void setupdata()
         {
-
-            alist.seed = roominfo.SeedName;
-
+            alist.seed = room.seed_name;
 
             if (File.Exists(Application.persistentDataPath + "/archdata"))
             {
@@ -184,22 +212,22 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     ArchipelageItemList savedlist = (ArchipelageItemList)serializer.Deserialize(file, typeof(ArchipelageItemList));
-                    if (alist.seed == savedlist.seed)
+                    if (alist.seed == savedlist.seed && savedlist.listversion == 2)
                     {
                         ArchipelagoConsole.LogMessage("archdata file found restoring session");
                         if (alist.merge(savedlist.list))
                         {
                             ArchipelagoConsole.LogMessage("ERROR LOADING SAVED ITEM LIST RESETING ITEM LIST");
                             alist = new ArchipelageItemList();
-                            alist.seed = roominfo.SeedName;
-                            sendJson("{\"cmd\":"+"\"Sync\"}");
+                            alist.seed = room.seed_name;
+                            sendJson("{\"cmd\":\"Sync\"}");
                         }
                     }
                     else
                     {
                         ArchipelagoConsole.LogMessage("archdata file found but dosent match server seed creating new session");
-                        ArchipelagoConsole.LogMessage(roominfo.SeedName + ": does not equal :" + savedlist.seed);
-                        alist.seed = roominfo.SeedName;
+                        ArchipelagoConsole.LogMessage(room.seed_name + ": does not equal :" + savedlist.seed);
+                        alist.seed = room.seed_name;
                     }
                 }
             }
@@ -209,221 +237,115 @@ namespace HuniePopArchiepelagoClient.Archipelago
             }
         }
 
-        public static void connerror(ConnectionRefusedPacket msg)
-        {
-            ArchipelagoConsole.LogMessage("CONNECTION TO ARCHIPELAGO SERVER REFUSED WITH ERRORS:");
-            for (int i = 0; i < msg.Errors.Length; i++)
-            {
-                switch (msg.Errors[i])
-                {
-                    case ConnectionRefusedError.InvalidSlot:
-                        ArchipelagoConsole.LogMessage("ERROR: NAME DID NOT MATCH ANY NAMES ON SERVER");
-                        break;
-                    case ConnectionRefusedError.InvalidGame:
-                        ArchipelagoConsole.LogMessage("ERROR: NAME IS CORRECT BUT GAME ASSOIATED WITH IT IS WRONG");
-                        break;
-                    case ConnectionRefusedError.SlotAlreadyTaken:
-                        ArchipelagoConsole.LogMessage("ERROR: CONNECTION TO THIS SLOT IS ALREADY ESTABLISHED");
-                        break;
-                    case ConnectionRefusedError.IncompatibleVersion:
-                        ArchipelagoConsole.LogMessage("ERROR: VERSION MISSMATCH");
-                        break;
-                    case ConnectionRefusedError.InvalidPassword:
-                        ArchipelagoConsole.LogMessage("ERROR: PASSWORD IS WRONG");
-                        break;
-                    case ConnectionRefusedError.InvalidItemsHandling:
-                        ArchipelagoConsole.LogMessage("ERROR: ITEM HANDLING FLAGS ARE WRONG");
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-
-            foreach (ConnectionRefusedError error in msg.Errors)
-            {
-            }
-        }
-
         public static void msgCallback(string msg)
         {
-            //ArchipelagoConsole.LogMessage($"{msg}");
             if (!msg.StartsWith("{") && !msg.StartsWith("["))
             {
                 ArchipelagoConsole.LogMessage(msg);
                 Plugin.curse.error = msg;
                 return;
             }
-            ArchipelagoPacketBase packet = null;
 
-            packet = JsonConvert.DeserializeObject<ArchipelagoPacketBase>(msg, Converter);
+            string cmd = "";
+            JObject msgjson = JObject.Parse(msg);
+            if (msgjson.ContainsKey("cmd"))
+            {
+                cmd = (string)msgjson["cmd"];
+            }
 
-            if (packet != null)
-                    //DEBUG PACKET CODE
-                    Plugin.BepinLogger.LogMessage(JsonConvert.SerializeObject(packet));
-                    if (packet is RoomInfoPacket)
-                    {
-                        Plugin.curse.roominfo = (RoomInfoPacket)packet;
-                    }
-                    else if (packet is ConnectionRefusedPacket)
-                    {
-                        connerror((ConnectionRefusedPacket)packet);
-                        Plugin.curse.Authenticated = false;
-                        Plugin.curse.working = false;
-                        Plugin.curse.fullconnect = false;
-                        Plugin.tringtoconnect = false;
-                        Plugin.connectstage = 0;
-                    }
-                    else if (packet is ConnectedPacket)
-                    {
-                        Plugin.curse.connected = (ConnectedPacket)packet;
-                        Plugin.curse.Authenticated = true;
-                        Plugin.curse.setupdata();
-                    }
-                    else if (packet is ReceivedItemsPacket)
-                    {
-                        ReceivedItemsPacket p = (ReceivedItemsPacket)packet;
-                        foreach (NetworkItem item in p.Items)
-                        {
-                            alist.add(item);
-                        }
-                        if (!Plugin.curse.fullconnect) 
-                        {
-                            Plugin.BepinLogger.LogMessage("recieved an item so everything look like its working");
-                            Plugin.curse.fullconnect = true; 
-                        }
-                    }
-                    else if (packet is LocationInfoPacket)
-                    {
-                    }
-                    else if (packet is RoomUpdatePacket)
-                    {
-                    }
-                    else if (packet is PrintJsonPacket)
-                    {
-                        printJSON((PrintJsonPacket)packet);
-                    }
-                    else if (packet is BouncedPacket)
-                    {
-                    }
-                    else if (packet is InvalidPacketPacket)
-                    {
-                    }
-                    else if (packet is RetrievedPacket)
-                    {
-                    }
-                    else if (packet is SetReplyPacket)
-                    {
-                    }
-                
+            //ArchipelagoConsole.LogMessage("MESSAGE GOTTEN\n" + msg);
+            if (cmd == "RoomInfo")
+            {
+                //ArchipelagoConsole.LogMessage("RoomInfo PACKET GOTTEN");
+                Plugin.curse.room = JsonConvert.DeserializeObject<RoomInfoPacket>(msg);
+                Plugin.curse.recievedroominfo = true;
+            }
+            else if (cmd == "ConnectionRefused")
+            {
+                ArchipelagoConsole.LogMessage("ConnectionRefused PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else if (cmd == "Connected")
+            {
+                //ArchipelagoConsole.LogMessage("Connected PACKET GOTTEN");
+                Plugin.curse.connected = JsonConvert.DeserializeObject<ConnectedPacket>(msg);
+                Plugin.curse.setupdata();
+                Plugin.curse.recievedconnectedpacket = true;
+
+            }
+            else if (cmd == "ReceivedItems")
+            {
+                //ArchipelagoConsole.LogMessage("ReceivedItems PACKET GOTTEN");
+                if (!Plugin.curse.fullconnection)
+                {
+                    Plugin.curse.fullconnection = true;
+                }
+                ReceivedItemsPacket pack = JsonConvert.DeserializeObject<ReceivedItemsPacket>(msg);
+                foreach (NetworkItem item in pack.items)
+                {
+                    alist.add(item);
+                }
+
+            }
+            else if (cmd == "LocationInfo")
+            {
+                ArchipelagoConsole.LogMessage("LocationInfo PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else if (cmd == "RoomUpdate")
+            {
+                //ArchipelagoConsole.LogMessage("RoomUpdate PACKET GOTTEN");
+                //ArchipelagoConsole.LogMessage(msg);
+                JsonConvert.DeserializeObject<RoomUpdatePacket>(msg).update();
+
+            }
+            else if (cmd == "PrintJSON")
+            {
+                //ArchipelagoConsole.LogMessage("PrintJSON PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(JsonConvert.DeserializeObject<PrintJSONPacket>(msg).print());
+
+            }
+            else if (cmd == "DataPackage")
+            {
+                //ArchipelagoConsole.LogMessage("DataPackage PACKET GOTTEN");
+                Plugin.curse.data = JsonConvert.DeserializeObject<DataPackagePacket>(msg);
+                //ArchipelagoConsole.LogMessage(Plugin.curse.data.data.games.ToString());
+                Plugin.curse.recievedroomdatapackage = true;
+
+            }
+            else if (cmd == "Bounced")
+            {
+                ArchipelagoConsole.LogMessage("Bounced PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else if (cmd == "InvalidPacket")
+            {
+                ArchipelagoConsole.LogMessage("InvalidPacket PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else if (cmd == "Retrieved")
+            {
+                ArchipelagoConsole.LogMessage("Retrieved PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else if (cmd == "SetReply")
+            {
+                ArchipelagoConsole.LogMessage("SetReply PACKET GOTTEN");
+                ArchipelagoConsole.LogMessage(msg);
+
+            }
+            else
+            {
+                ArchipelagoConsole.LogMessage("---MESSAGE ERROR PRINTING MESSAGE---");
+                ArchipelagoConsole.LogMessage($"{msg}");
+            }
+
         }
-
-        public static void printJSON(PrintJsonPacket packet)
-        {
-            Plugin.BepinLogger.LogMessage(JsonConvert.SerializeObject(packet));
-            string msg = "";
-
-            Plugin.BepinLogger.LogMessage(packet.Data.Length);
-
-            for (int i = 0; i < packet.Data.Count(); i++)
-            {
-                var part = packet.Data[i];
-
-                if (part.Type == JsonMessagePartType.PlayerId)
-                {
-                    bool f = true;
-                    if (Plugin.curse.roominfo.Players == null)
-                    {
-                        msg += "PLAYER{" + part.Text + "}";
-                        continue;
-                    }
-                    for(int j=0; j<Plugin.curse.roominfo.Players.Length; j++)
-                    {
-                        if (Plugin.curse.roominfo.Players[j].Slot.ToString() == part.Text)
-                        {
-                            msg += Plugin.curse.roominfo.Players[j].Name;
-                            f= false;
-                        }
-                    }
-                    if (f)
-                    {
-                        msg += "PLAYER{" + part.Text + "}";
-                    }
-
-                }
-                else if (part.Type == JsonMessagePartType.ItemId)
-                {
-                    string s = Util.idtoitem(Convert.ToInt32(part.Text));
-                    if (s == "")
-                    {
-                        msg += "Item{" + part.Text + "}";
-                    }
-                    else
-                    {
-                        msg += s;
-                    }
-                }
-                else if (part.Type == JsonMessagePartType.LocationId)
-                {
-                    msg += "LOCATION{" + part.Text + "}";
-                }
-                else
-                {
-                    msg += part.Text;
-                }
-            }
-            if (msg == "") { msg = "ERROR DECODING PRINT JSON"; }
-            ArchipelagoConsole.LogMessage(msg);
-            /*
-            if (packet is ItemPrintJsonPacket)
-            {
-                ItemPrintJsonPacket p = (ItemPrintJsonPacket)packet;
-                
-            }
-            else if (packet is ItemCheatPrintJsonPacket)
-            {
-            }
-            else if (packet is HintPrintJsonPacket)
-            {
-            }
-            else if (packet is JoinPrintJsonPacket)
-            {
-            }
-            else if (packet is LeavePrintJsonPacket)
-            {
-            }
-            else if (packet is ChatPrintJsonPacket)
-            {
-            }
-            else if (packet is ServerChatPrintJsonPacket)
-            {
-            }
-            else if (packet is TutorialPrintJsonPacket)
-            {
-            }
-            else if (packet is TagsChangedPrintJsonPacket)
-            {
-            }
-            else if (packet is CommandResultPrintJsonPacket)
-            {
-            }
-            else if (packet is AdminCommandResultPrintJsonPacket)
-            {
-            }
-            else if (packet is GoalPrintJsonPacket)
-            {
-            }
-            else if (packet is ReleasePrintJsonPacket)
-            {
-            }
-            else if (packet is CollectPrintJsonPacket)
-            {
-            }
-            else if (packet is CountdownPrintJsonPacket)
-            {
-            }*/
-        }
-
     }
 
 

@@ -10,6 +10,8 @@ using Mono.Cecil.Cil;
 using UnityEngine;
 using System.Threading;
 using System.Collections.Generic;
+using Microsoft.Win32;
+using System.Runtime.CompilerServices;
 
 
 namespace HuniePopArchiepelagoClient.Utils
@@ -55,6 +57,33 @@ namespace HuniePopArchiepelagoClient.Utils
 
             Util.processarch();
 
+            for (int i = 0; i < player.inventory.Length; i++)
+            {
+                if (player.inventory[i].itemDefinition == null) { continue; }
+                if (player.inventory[i].itemDefinition.name.StartsWith("ARCH ITEM:"))
+                {
+                    player.inventory[i].itemDefinition = null;
+                    player.inventory[i].presentDefinition= null;
+                }
+            }
+            for (int j = 0; j < player.gifts.Length; j++)
+            {
+                if (player.gifts[j].itemDefinition == null) { continue; }
+                if (player.gifts[j].itemDefinition.name.StartsWith("ARCH ITEM:"))
+                {
+                    player.gifts[j].itemDefinition = null;
+                    player.gifts[j].presentDefinition = null;
+                }
+            }
+            for (int j = 0; j < player.dateGifts.Length; j++)
+            {
+                if (player.dateGifts[j].itemDefinition == null) { continue; }
+                if (player.dateGifts[j].itemDefinition.name.StartsWith("ARCH ITEM:"))
+                {
+                    player.dateGifts[j].itemDefinition = null;
+                    player.dateGifts[j].presentDefinition = null;
+                }
+            }
 
             using (StreamWriter archfile = File.CreateText(Application.persistentDataPath + "/archdata"))
             {
@@ -129,12 +158,18 @@ namespace HuniePopArchiepelagoClient.Utils
         {
             if (____currentStoreTab == 0)
             {
+                ArchipelagoConsole.LogMessage($"PURCHASED ITEM:{storeItemSlot.itemDefinition.name} | ID:{storeItemSlot.itemDefinition.id}");
+                if (storeItemSlot.itemDefinition.id > 42069500)
+                {
+                    ArchipelagoConsole.LogMessage("SENDING LOCATION");
+                    Plugin.curse.sendLoc(storeItemSlot.itemDefinition.id);
+                    return true;
+                }
                 long a = Util.itemidtoarchid(storeItemSlot.itemDefinition.id);
                 for (int i = 0; i < CursedArchipelagoClient.alist.list.Count; i++)
                 {
                     if (CursedArchipelagoClient.alist.list[i].Id == a && CursedArchipelagoClient.alist.list[i].putinshop)
                     {
-                        ArchipelagoConsole.LogMessage("PURCHASED ITEM: " + storeItemSlot.itemDefinition.name);
                         CursedArchipelagoClient.alist.list[i].putinshop = false;
                         return true;
                     }
@@ -162,7 +197,7 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static bool newgirloveride(ref int ____saveFileIndex)
         {
-            if (!Plugin.curse.fullconnect)
+            if (!Plugin.curse.fullconnection)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false; 
@@ -174,7 +209,7 @@ namespace HuniePopArchiepelagoClient.Utils
             }
             SaveFile saveFile = SaveUtils.GetSaveFile(____saveFileIndex);
 
-            if (Plugin.curse.Authenticated && !saveFile.started)
+            if (Plugin.curse.fullconnection && !saveFile.started)
             {
 
                 saveFile.started = true;
@@ -184,20 +219,20 @@ namespace HuniePopArchiepelagoClient.Utils
 
                 saveFile.tutorialStep = 10;
 
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
                 
-                saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.SlotData["start_girl"]);
+                saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.slot_data["start_girl"]);
                 saveFile.currentLocation = 22;
 
                 for (int i = 0; i < CursedArchipelagoClient.alist.list.Count; i++)
@@ -205,6 +240,7 @@ namespace HuniePopArchiepelagoClient.Utils
                     if (CursedArchipelagoClient.alist.list[i].Id > 42069012 && CursedArchipelagoClient.alist.list[i].Id < 42069025)
                     {
                         saveFile.girls[(int)CursedArchipelagoClient.alist.list[i].Id - 42069012].metStatus = 3;
+                        CursedArchipelagoClient.alist.list[i].processed = true;
                     }
                 }
 
@@ -219,7 +255,7 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool newguyoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.fullconnect)
+            if (!Plugin.curse.fullconnection)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false;
@@ -231,7 +267,7 @@ namespace HuniePopArchiepelagoClient.Utils
             }
             SaveFile saveFile = SaveUtils.GetSaveFile(____saveFileIndex);
 
-            if (Plugin.curse.Authenticated && !saveFile.started)
+            if (Plugin.curse.fullconnection && !saveFile.started)
             {
 
                 saveFile.started = true;
@@ -241,20 +277,20 @@ namespace HuniePopArchiepelagoClient.Utils
 
                 saveFile.tutorialStep = 10;
 
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.SlotData["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
 
-                saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.SlotData["start_girl"]);
+                saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.slot_data["start_girl"]);
                 saveFile.currentLocation = 22;
 
                 for (int i = 0; i < CursedArchipelagoClient.alist.list.Count; i++)
@@ -262,6 +298,7 @@ namespace HuniePopArchiepelagoClient.Utils
                     if (CursedArchipelagoClient.alist.list[i].Id > 42069012 && CursedArchipelagoClient.alist.list[i].Id < 42069025)
                     {
                         saveFile.girls[(int)CursedArchipelagoClient.alist.list[i].Id - 42069012].metStatus = 3;
+                        CursedArchipelagoClient.alist.list[i].processed = true;
                     }
                 }
 
@@ -277,7 +314,7 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool continueoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.fullconnect)
+            if (!Plugin.curse.fullconnection)
             {
                 helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
                 return false;
@@ -380,16 +417,36 @@ namespace HuniePopArchiepelagoClient.Utils
         {
             if (itemType == ItemType.GIFT)
             {
-                ArchipelagoConsole.LogMessage("PROCESSING SHOP ITEMS");
+                //ArchipelagoConsole.LogMessage("PROCESSING SHOP ITEMS");
                 List<ItemDefinition> p = new List<ItemDefinition>();
                 for (int i = 0; i < CursedArchipelagoClient.alist.list.Count; i++)
                 {
                     if (CursedArchipelagoClient.alist.list[i].putinshop)
                     {
+                        //ArchipelagoConsole.LogMessage("ADDED ARCH ITEM TO STORE LIST");
                         p.Add(GameManager.Data.Items.Get(Util.archidtoitemid(CursedArchipelagoClient.alist.list[i].Id)));
                     }
                 }
-                ArchipelagoConsole.LogMessage("NUMBER OF ITEMS THAT NEED TO BE PUT INTO SHOP:" + p.Count);
+                //ArchipelagoConsole.LogMessage("ARCHITEMS PROCESSED");
+                int shopslots = Convert.ToInt32(Plugin.curse.connected.slot_data["number_of_shop_items"]);
+                int[] pre = [293, 294, 295, 296, 297, 298];
+                for (int j=0; j<shopslots; j++)
+                {
+                    if (Plugin.curse.connected.checked_locaions != null)
+                    {
+                        if (Plugin.curse.connected.checked_locaions.Contains(42069501 + j)) { continue; }
+                    }
+                    ItemDefinition item = new ItemDefinition();
+                    item.type = ItemType.PRESENT;
+                    item.hidden = false;
+                    item.iconName = GameManager.Data.Items.Get(pre[UnityEngine.Random.Range(0, pre.Count() - 1)]).iconName;
+
+                    item.name = "ARCH ITEM:" + (j + 1).ToString();
+                    item.id = 42069501 + j;
+                    item.description = "LOCATION CHECK FOR ARCHIPELAGO WILL BE REMOVED FROM INVENTORY WHEN MOVING LOCATIONS";
+                    p.Add(item);
+                }
+
                 ListUtils.Shuffle<ItemDefinition>(p);
                 if (p.Count > 12)
                 {
@@ -399,7 +456,7 @@ namespace HuniePopArchiepelagoClient.Utils
                 {
                     if (p.Count > l)
                     {
-                        ArchipelagoConsole.LogMessage(p[l].name + " ADDED TO SHOP");
+                        //ArchipelagoConsole.LogMessage(p[l].name + " ADDED TO SHOP");
                         storeList[l].itemDefinition = p[l];
                         storeList[l].soldOut = false;
                     }
@@ -444,6 +501,51 @@ namespace HuniePopArchiepelagoClient.Utils
 
         }
 
+
+        [HarmonyPatch(typeof(ItemDefinition), "storeCost", MethodType.Getter)]
+        [HarmonyPrefix]
+        public static bool itemcost(ref int __result,ItemDefinition __instance)
+        {
+            if (__instance.type == ItemType.PRESENT)
+            {
+                __result = Convert.ToInt32(Plugin.curse.connected.slot_data["shop_item_cost"]);
+                return false;
+            }
+            return true;
+        }
+        
+        [HarmonyPatch(typeof(PuzzleGame), "Begin")]
+        [HarmonyPrefix]
+        public static void puzzlemodding(PuzzleGame __instance, ref int ____maxMoves)
+        {
+            ____maxMoves = 99;
+            if (__instance.isBonusRound)
+            {
+                //ArchipelagoConsole.LogMessage("BONUS");
+            }
+            else
+            {
+                //ArchipelagoConsole.LogMessage("NOT BONUS");
+                __instance.SetResourceValue(PuzzleGameResourceType.MOVES, Convert.ToInt32(Plugin.curse.connected.slot_data["puzzle_moves"]), false);
+            }
+        }
+
+        [HarmonyPatch(typeof(PuzzleManager), "GetAffectionGoal")]
+        [HarmonyPrefix]
+        public static bool puzzlegoalmodding(ref int __result)
+        {
+            int goal = Convert.ToInt32(Plugin.curse.connected.slot_data["puzzle_affection_base"]);
+            int mod = 0;
+
+            List<GirlPlayerData> girls = GameManager.System.Player.girls;
+            foreach (GirlPlayerData g in girls)
+            {
+                mod += (g.relationshipLevel - 1);
+            }
+            __result = goal + (Convert.ToInt32(Plugin.curse.connected.slot_data["puzzle_affection_add"]) * mod);
+            if (__result > 999999) { __result = 999999; }
+            return false;
+        }
 
 
 
@@ -535,20 +637,20 @@ namespace HuniePopArchiepelagoClient.Utils
 
                     if (player.pantiesTurnedIn.Contains(archidtoitemid(item.Id)))
                     {
-                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " already turned in skipping");
+                        ArchipelagoConsole.LogMessage(item.itemname + " already turned in skipping");
                         item.processed = true;
                         continue;
                     }
 
                     if (player.HasItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)))){
-                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " already in inventory skipping");
+                        ArchipelagoConsole.LogMessage(item.itemname + " already in inventory skipping");
                         item.processed = true;
                         continue;
                     }
 
                     if (!player.IsInventoryFull())
                     {
-                        ArchipelagoConsole.LogMessage(idtoitem((int)item.Id) + " recieved");
+                        ArchipelagoConsole.LogMessage(item.itemname + " recieved");
                         player.AddItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)), player.inventory, false, false);
                         item.processed = true;
                     }
@@ -650,447 +752,6 @@ namespace HuniePopArchiepelagoClient.Utils
                 }
 
 
-            }
-        }
-
-        public static string idtoitem(int id)
-        {
-            switch (id)
-            {
-                case 42069001:
-                    return "tiffany's panties";
-                case 42069002:
-                    return "aiko's panties";
-                case 42069003:
-                    return "kyanna's panties";
-                case 42069004:
-                    return "audrey's panties";
-                case 42069005:
-                    return "lola's panties";
-                case 42069006:
-                    return "nikki's panties";
-                case 42069007:
-                    return "jessie's panties";
-                case 42069008:
-                    return "beli's panties";
-                case 42069009:
-                    return "kyu's panties";
-                case 42069010:
-                    return "momo's panties";
-                case 42069011:
-                    return "celeste's panties";
-                case 42069012:
-                    return "venus's panties";
-                case 42069013:
-                    return "Unlock Girl(tiffany)";
-                case 42069014:
-                    return "Unlock Girl(aiko)";
-                case 42069015:
-                    return "Unlock Girl(kyanna)";
-                case 42069016:
-                    return "Unlock Girl(audrey)";
-                case 42069017:
-                    return "Unlock Girl(lola)";
-                case 42069018:
-                    return "Unlock Girl(nikki)";
-                case 42069019:
-                    return "Unlock Girl(jessie)";
-                case 42069020:
-                    return "Unlock Girl(beli)";
-                case 42069021:
-                    return "Unlock Girl(kyu)";
-                case 42069022:
-                    return "Unlock Girl(momo)";
-                case 42069023:
-                    return "Unlock Girl(celeste)";
-                case 42069024:
-                    return "Unlock Girl(venus)";
-                case 42069025:
-                    return "academy gift item 1";
-                case 42069026:
-                    return "academy gift item 2";
-                case 42069027:
-                    return "academy gift item 3";
-                case 42069028:
-                    return "academy gift item 4";
-                case 42069029:
-                    return "academy gift item 5";
-                case 42069030:
-                    return "academy gift item 6";
-                case 42069031:
-                    return "toys gift item 1";
-                case 42069032:
-                    return "toys gift item 2";
-                case 42069033:
-                    return "toys gift item 3";
-                case 42069034:
-                    return "toys gift item 4";
-                case 42069035:
-                    return "toys gift item 5";
-                case 42069036:
-                    return "toys gift item 6";
-                case 42069037:
-                    return "fitness gift item 1";
-                case 42069038:
-                    return "fitness gift item 2";
-                case 42069039:
-                    return "fitness gift item 3";
-                case 42069040:
-                    return "fitness gift item 4";
-                case 42069041:
-                    return "fitness gift item 5";
-                case 42069042:
-                    return "fitness gift item 6";
-                case 42069043:
-                    return "rave gift item 1";
-                case 42069044:
-                    return "rave gift item 2";
-                case 42069045:
-                    return "rave gift item 3";
-                case 42069046:
-                    return "rave gift item 4";
-                case 42069047:
-                    return "rave gift item 5";
-                case 42069048:
-                    return "rave gift item 6";
-                case 42069049:
-                    return "sports gift item 1";
-                case 42069050:
-                    return "sports gift item 2";
-                case 42069051:
-                    return "sports gift item 3";
-                case 42069052:
-                    return "sports gift item 4";
-                case 42069053:
-                    return "sports gift item 5";
-                case 42069054:
-                    return "sports gift item 6";
-                case 42069055:
-                    return "artist gift item 1";
-                case 42069056:
-                    return "artist gift item 2";
-                case 42069057:
-                    return "artist gift item 3";
-                case 42069058:
-                    return "artist gift item 4";
-                case 42069059:
-                    return "artist gift item 5";
-                case 42069060:
-                    return "artist gift item 6";
-                case 42069061:
-                    return "baking gift item 1";
-                case 42069062:
-                    return "baking gift item 2";
-                case 42069063:
-                    return "baking gift item 3";
-                case 42069064:
-                    return "baking gift item 4";
-                case 42069065:
-                    return "baking gift item 5";
-                case 42069066:
-                    return "baking gift item 6";
-                case 42069067:
-                    return "yoga gift item 1";
-                case 42069068:
-                    return "yoga gift item 2";
-                case 42069069:
-                    return "yoga gift item 3";
-                case 42069070:
-                    return "yoga gift item 4";
-                case 42069071:
-                    return "yoga gift item 5";
-                case 42069072:
-                    return "yoga gift item 6";
-                case 42069073:
-                    return "dancer gift item 1";
-                case 42069074:
-                    return "dancer gift item 2";
-                case 42069075:
-                    return "dancer gift item 3";
-                case 42069076:
-                    return "dancer gift item 4";
-                case 42069077:
-                    return "dancer gift item 5";
-                case 42069078:
-                    return "dancer gift item 6";
-                case 42069079:
-                    return "aquarium gift item 1";
-                case 42069080:
-                    return "aquarium gift item 2";
-                case 42069081:
-                    return "aquarium gift item 3";
-                case 42069082:
-                    return "aquarium gift item 4";
-                case 42069083:
-                    return "aquarium gift item 5";
-                case 42069084:
-                    return "aquarium gift item 6";
-                case 42069085:
-                    return "scuba gift item 1";
-                case 42069086:
-                    return "scuba gift item 2";
-                case 42069087:
-                    return "scuba gift item 3";
-                case 42069088:
-                    return "scuba gift item 4";
-                case 42069089:
-                    return "scuba gift item 5";
-                case 42069090:
-                    return "scuba gift item 6";
-                case 42069091:
-                    return "garden gift item 1";
-                case 42069092:
-                    return "garden gift item 2";
-                case 42069093:
-                    return "garden gift item 3";
-                case 42069094:
-                    return "garden gift item 4";
-                case 42069095:
-                    return "garden gift item 5";
-                case 42069096:
-                    return "garden gift item 6";
-                case 42069097:
-                    return "tiffany unique item 1";
-                case 42069098:
-                    return "tiffany unique item 2";
-                case 42069099:
-                    return "tiffany unique item 3";
-                case 42069100:
-                    return "tiffany unique item 4";
-                case 42069101:
-                    return "tiffany unique item 5";
-                case 42069102:
-                    return "tiffany unique item 6";
-                case 42069103:
-                    return "aiko unique item 1";
-                case 42069104:
-                    return "aiko unique item 2";
-                case 42069105:
-                    return "aiko unique item 3";
-                case 42069106:
-                    return "aiko unique item 4";
-                case 42069107:
-                    return "aiko unique item 5";
-                case 42069108:
-                    return "aiko unique item 6";
-                case 42069109:
-                    return "kyanna unique item 1";
-                case 42069110:
-                    return "kyanna unique item 2";
-                case 42069111:
-                    return "kyanna unique item 3";
-                case 42069112:
-                    return "kyanna unique item 4";
-                case 42069113:
-                    return "kyanna unique item 5";
-                case 42069114:
-                    return "kyanna unique item 6";
-                case 42069115:
-                    return "audrey unique item 1";
-                case 42069116:
-                    return "audrey unique item 2";
-                case 42069117:
-                    return "audrey unique item 3";
-                case 42069118:
-                    return "audrey unique item 4";
-                case 42069119:
-                    return "audrey unique item 5";
-                case 42069120:
-                    return "audrey unique item 6";
-                case 42069121:
-                    return "lola unique item 1";
-                case 42069122:
-                    return "lola unique item 2";
-                case 42069123:
-                    return "lola unique item 3";
-                case 42069124:
-                    return "lola unique item 4";
-                case 42069125:
-                    return "lola unique item 5";
-                case 42069126:
-                    return "lola unique item 6";
-                case 42069127:
-                    return "nikki unique item 1";
-                case 42069128:
-                    return "nikki unique item 2";
-                case 42069129:
-                    return "nikki unique item 3";
-                case 42069130:
-                    return "nikki unique item 4";
-                case 42069131:
-                    return "nikki unique item 5";
-                case 42069132:
-                    return "nikki unique item 6";
-                case 42069133:
-                    return "jessie unique item 1";
-                case 42069134:
-                    return "jessie unique item 2";
-                case 42069135:
-                    return "jessie unique item 3";
-                case 42069136:
-                    return "jessie unique item 4";
-                case 42069137:
-                    return "jessie unique item 5";
-                case 42069138:
-                    return "jessie unique item 6";
-                case 42069139:
-                    return "beli unique item 1";
-                case 42069140:
-                    return "beli unique item 2";
-                case 42069141:
-                    return "beli unique item 3";
-                case 42069142:
-                    return "beli unique item 4";
-                case 42069143:
-                    return "beli unique item 5";
-                case 42069144:
-                    return "beli unique item 6";
-                case 42069145:
-                    return "kyu unique item 1";
-                case 42069146:
-                    return "kyu unique item 2";
-                case 42069147:
-                    return "kyu unique item 3";
-                case 42069148:
-                    return "kyu unique item 4";
-                case 42069149:
-                    return "kyu unique item 5";
-                case 42069150:
-                    return "kyu unique item 6";
-                case 42069151:
-                    return "momo unique item 1";
-                case 42069152:
-                    return "momo unique item 2";
-                case 42069153:
-                    return "momo unique item 3";
-                case 42069154:
-                    return "momo unique item 4";
-                case 42069155:
-                    return "momo unique item 5";
-                case 42069156:
-                    return "momo unique item 6";
-                case 42069157:
-                    return "celeste unique item 1";
-                case 42069158:
-                    return "celeste unique item 2";
-                case 42069159:
-                    return "celeste unique item 3";
-                case 42069160:
-                    return "celeste unique item 4";
-                case 42069161:
-                    return "celeste unique item 5";
-                case 42069162:
-                    return "celeste unique item 6";
-                case 42069163:
-                    return "venus unique item 1";
-                case 42069164:
-                    return "venus unique item 2";
-                case 42069165:
-                    return "venus unique item 3";
-                case 42069166:
-                    return "venus unique item 4";
-                case 42069167:
-                    return "venus unique item 5";
-                case 42069168:
-                    return "venus unique item 6";
-                case 42069169:
-                    return "talent lv-up 1";
-                case 42069170:
-                    return "talent lv-up 2";
-                case 42069171:
-                    return "talent lv-up 3";
-                case 42069172:
-                    return "talent lv-up 4";
-                case 42069173:
-                    return "talent lv-up 5";
-                case 42069174:
-                    return "talent lv-up 6";
-                case 42069175:
-                    return "flirtation lv-up 1";
-                case 42069176:
-                    return "flirtation lv-up 2";
-                case 42069177:
-                    return "flirtation lv-up 3";
-                case 42069178:
-                    return "flirtation lv-up 4";
-                case 42069179:
-                    return "flirtation lv-up 5";
-                case 42069180:
-                    return "flirtation lv-up 6";
-                case 42069181:
-                    return "romance lv-up 1";
-                case 42069182:
-                    return "romance lv-up 2";
-                case 42069183:
-                    return "romance lv-up 3";
-                case 42069184:
-                    return "romance lv-up 4";
-                case 42069185:
-                    return "romance lv-up 5";
-                case 42069186:
-                    return "romance lv-up 6";
-                case 42069187:
-                    return "sexuality lv-up 1";
-                case 42069188:
-                    return "sexuality lv-up 2";
-                case 42069189:
-                    return "sexuality lv-up 3";
-                case 42069190:
-                    return "sexuality lv-up 4";
-                case 42069191:
-                    return "sexuality lv-up 5";
-                case 42069192:
-                    return "sexuality lv-up 6";
-                case 42069193:
-                    return "passion lv-up 1";
-                case 42069194:
-                    return "passion lv-up 2";
-                case 42069195:
-                    return "passion lv-up 3";
-                case 42069196:
-                    return "passion lv-up 4";
-                case 42069197:
-                    return "passion lv-up 5";
-                case 42069198:
-                    return "passion lv-up 6";
-                case 42069199:
-                    return "sensitivity lv-up 1";
-                case 42069200:
-                    return "sensitivity lv-up 2";
-                case 42069201:
-                    return "sensitivity lv-up 3";
-                case 42069202:
-                    return "sensitivity lv-up 4";
-                case 42069203:
-                    return "sensitivity lv-up 5";
-                case 42069204:
-                    return "sensitivity lv-up 6";
-                case 42069205:
-                    return "charisma lv-up 1";
-                case 42069206:
-                    return "charisma lv-up 2";
-                case 42069207:
-                    return "charisma lv-up 3";
-                case 42069208:
-                    return "charisma lv-up 4";
-                case 42069209:
-                    return "charisma lv-up 5";
-                case 42069210:
-                    return "charisma lv-up 6";
-                case 42069211:
-                    return "luck lv-up 1";
-                case 42069212:
-                    return "luck lv-up 2";
-                case 42069213:
-                    return "luck lv-up 3";
-                case 42069214:
-                    return "luck lv-up 4";
-                case 42069215:
-                    return "luck lv-up 5";
-                case 42069216:
-                    return "luck lv-up 6";
-                default:
-                    return "";
             }
         }
 

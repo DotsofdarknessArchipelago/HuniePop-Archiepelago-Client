@@ -28,6 +28,8 @@ namespace HuniePopArchiepelagoClient.Utils
         private static Rect CommandTextRect;
         private static Rect SendCommandButton;
 
+        private static Texture2D SolidBoxTex;
+
         public static void Awake()
         {
             UpdateWindow();
@@ -53,6 +55,7 @@ namespace HuniePopArchiepelagoClient.Utils
 
             if (!Hidden || Time.time - lastUpdateTime < HideTimeout)
             {
+                DrawSolidBox(window);
                 scrollView = GUI.BeginScrollView(window, scrollView, scroll);
                 GUI.Box(text, "");
                 GUI.Box(text, scrollText, textStyle);
@@ -66,7 +69,7 @@ namespace HuniePopArchiepelagoClient.Utils
             //}
 
             // draw client/server commands entry
-            if (Hidden || !Plugin.curse.Authenticated) return;
+            if (Hidden || !Plugin.curse.fullconnection) return;
 
             CommandText = GUI.TextField(CommandTextRect, CommandText);
             if (!CommandText.IsNullOrWhiteSpace() && GUI.Button(SendCommandButton, "Send"))
@@ -155,6 +158,20 @@ namespace HuniePopArchiepelagoClient.Utils
             width = (int)(Screen.width * 0.035f);
             yPos += (int)(Screen.height * 0.03f);
             SendCommandButton = new Rect(xPos, yPos, width, height);
+        }
+
+        public static void DrawSolidBox(Rect boxRect)
+        {
+            if (SolidBoxTex == null)
+            {
+                var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                windowBackground.SetPixel(0, 0, new Color(0, 0, 0));
+                windowBackground.Apply();
+                SolidBoxTex = windowBackground;
+            }
+
+            // It's necessary to make a new GUIStyle here or the texture doesn't show up
+            GUI.Box(new Rect(boxRect.x, boxRect.y, boxRect.width, boxRect.height), "", new GUIStyle { normal = new GUIStyleState { background = SolidBoxTex } });
         }
     }
 }

@@ -15,7 +15,7 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.3.0";
+        public const string PluginVersion = "0.4.0";
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         private const string APDisplayInfo = $"Archipelago v{PluginVersion}";
@@ -30,6 +30,8 @@ namespace HuniePopArchiepelagoClient
         public static bool tringtoconnect = false;
         public static int connectstage = 0;
         bool dll;
+
+        private static Texture2D SolidBoxTex;
 
         private void Awake()
         {
@@ -84,39 +86,70 @@ namespace HuniePopArchiepelagoClient
 
             string statusMessage;
             // show the Archipelago Version and whether we're connected or not
-            if (curse.fullconnect)
+            if (curse.fullconnection)
             {
                 // if your game doesn't usually show the cursor this line may be necessary
                 // Cursor.visible = false;
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 40), "");
-                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.connected.SlotData["world_version"] +"): Status: Connected");
+                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.connected.slot_data["world_version"] + "): Status: Connected");
 
             }
             else if (tringtoconnect)
             {
-                GUI.Box(new Rect(Screen.width - 300, 10, 300, 140), "");
+                DrawSolidBox(new Rect(Screen.width - 300, 10, 300, 200));
+                GUI.Box(new Rect(Screen.width - 300, 10, 300, 200), "");
                 GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "-trying to connect to server");
-                if (helper.readyWS(curse.ws)==3)
+                if (helper.readyWS(curse.ws) == 3)
                 {
                     GUI.Label(new Rect(Screen.width - 295, 40, 300, 20), "-initial server connection established");
-                    GUI.Label(new Rect(Screen.width - 295, 60, 300, 20), "-sending archipelago connect packet");
-                    if (connectstage == 0) { connectstage++; curse.sendConnectPacket(); }
                 }
-                if (curse.Authenticated)
+                if (curse.recievedroominfo)
                 {
-                    GUI.Label(new Rect(Screen.width - 295, 80, 300, 20), "-connection to archipelago server established");
-                    GUI.Label(new Rect(Screen.width - 295, 100, 300, 20), "-waiting on geting a packet to know if connection");
-                    GUI.Label(new Rect(Screen.width - 295, 120, 300, 20), "is fully working");
+                    GUI.Label(new Rect(Screen.width - 295, 60, 300, 20), "-sending archipelago GetDataPackages packet");
+                    if (!curse.sendroomdatapackage)
+                    {
+                        curse.sendGetPackage();
+                        curse.sendroomdatapackage = true;
+                    }
+                }
+                if (curse.recievedroomdatapackage)
+                {
+                    GUI.Label(new Rect(Screen.width - 295, 80, 300, 20), "-recieved archipelago GetDataPackages packet");
+                    if (!curse.startprocessedroomdatapackage)
+                    {
+                        curse.data.data.setup();
+                        curse.processeddatapackage = true;
+                    }
+                }
+                if (curse.processeddatapackage)
+                {
+                    GUI.Label(new Rect(Screen.width - 295, 100, 300, 20), "-processed archipelago GetDataPackages");
+                    if (!curse.startprocessedroomdatapackage)
+                    {
+                        GUI.Label(new Rect(Screen.width - 295, 120, 300, 20), "-sending archipelago Connect Packet");
+                        if (!curse.sentconnectedpacket)
+                        {
+                            curse.sendConnectPacket();
+                            curse.sentconnectedpacket = true;
+                        }
+                    }
+                }
+                if (curse.recievedconnectedpacket)
+                {
+                    GUI.Label(new Rect(Screen.width - 295, 140, 300, 20), "-connection to archipelago server established");
+                    GUI.Label(new Rect(Screen.width - 295, 160, 300, 20), "-waiting on geting a packet to know if connection");
+                    GUI.Label(new Rect(Screen.width - 295, 180, 300, 20), "is fully working");
                 }
                 if (helper.readyWS(curse.ws) == 2)
                 {
-                    if (GUI.Button(new Rect(Screen.width - 200, 120, 100, 20), "RESET")) { tringtoconnect = false; }
+                    if (GUI.Button(new Rect(Screen.width - 200, 180, 100, 20), "RESET")) { tringtoconnect = false; }
                 }
             }
             else
             {
                 // if your game doesn't usually show the cursor this line may be necessary
                 // Cursor.visible = true;
+                DrawSolidBox(new Rect(Screen.width - 300, 10, 300, 130));
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 130), "");
 
                 statusMessage = " Status: Disconnected";
@@ -149,6 +182,21 @@ namespace HuniePopArchiepelagoClient
             }
 
             // this is a good place to create and add a bunch of debug buttons
+        }
+
+
+        public static void DrawSolidBox(Rect boxRect)
+        {
+            if (SolidBoxTex == null)
+            {
+                var windowBackground = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+                windowBackground.SetPixel(0, 0, new Color(0, 0, 0));
+                windowBackground.Apply();
+                SolidBoxTex = windowBackground;
+            }
+
+            // It's necessary to make a new GUIStyle here or the texture doesn't show up
+            GUI.Box(boxRect, "", new GUIStyle { normal = new GUIStyleState { background = SolidBoxTex } });
         }
     }
 }

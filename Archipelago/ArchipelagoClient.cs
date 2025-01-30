@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 using System.Linq;
 using System.Threading;
 using Archipelago.MultiClient.Net;
@@ -169,4 +170,4 @@ namespace HuniePopArchiepelagoClient.Archipelago
             Disconnect();
         }
     }
-}
+}*/
