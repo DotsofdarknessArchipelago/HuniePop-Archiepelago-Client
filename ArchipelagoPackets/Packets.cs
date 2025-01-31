@@ -281,21 +281,21 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
     }
     public class GameData
     {
-        public Dictionary<string, int> item_name_to_id;
-        public Dictionary<string, int> location_name_to_id;
-        public Dictionary<int, string> idtoitem;
-        public Dictionary<int, string> idtolocation;
+        public Dictionary<string, long> item_name_to_id;
+        public Dictionary<string, long> location_name_to_id;
+        public Dictionary<long, string> idtoitem;
+        public Dictionary<long, string> idtolocation;
         public string checksum;
 
         public void setup()
         {
-            Dictionary<int, string> tmpi = new Dictionary<int, string>();
-            Dictionary<int, string> tmpl = new Dictionary<int, string>();
-            foreach (KeyValuePair<string, int> i in item_name_to_id)
+            Dictionary<long, string> tmpi = new Dictionary<long, string>();
+            Dictionary<long, string> tmpl = new Dictionary<long, string>();
+            foreach (KeyValuePair<string, long> i in item_name_to_id)
             {
                 tmpi.Add(i.Value, i.Key);
             }
-            foreach (KeyValuePair<string, int> l in location_name_to_id)
+            foreach (KeyValuePair<string, long> l in location_name_to_id)
             {
                 tmpl.Add(l.Value, l.Key);
             }
