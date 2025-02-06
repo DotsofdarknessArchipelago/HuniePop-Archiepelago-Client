@@ -9,6 +9,7 @@ using Newtonsoft.Json.Linq;
 using HuniePopArchiepelagoClient.ArchipelagoPackets;
 using HuniePopArchiepelagoClient.Utils;
 using System.Security.Principal;
+using System.Net.NetworkInformation;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -23,6 +24,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public RoomInfoPacket room;
         public DataPackagePacket data;
         public ConnectedPacket connected;
+        public NetworkVersion worldver;
 
         public string seed = "";
         public string error = null;
@@ -56,13 +58,13 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
             if (!url.StartsWith("ws://") && !url.StartsWith("wss://"))
             {
-                helper.MessageBox(IntPtr.Zero, "URL supplied does not contain \"ws://\" or \"wss://\" at the start\ni.e. wss://archipelago.gg:12345\nNOTE: if connecting to archipelago.gg use \"wss://\"", "URL ERROR", 0);
+                ArchipelagoConsole.LogImportant("URL supplied does not contain \"ws://\" or \"wss://\" at the start\ni.e. wss://archipelago.gg:12345\nNOTE: if connecting to archipelago.gg use \"wss://\"");
                 return;
             }
 
             ws = helper.getWS();
             helper.seturlWS(ws, url);
-            helper.setcallWS(ws, myCallBack);
+            helper.setcallWS(ws);
 
         }
 
@@ -122,7 +124,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public void code(string msg)
         {
 
-            ArchipelagoConsole.LogMessage("CODE ENTERED");
+            ArchipelagoConsole.LogMessage($"CODE ENTERED: {msg}");
             if (msg == "$archdata")
             {
                 ArchipelagoConsole.LogMessage("-------DEBUG DATA-------");
@@ -132,16 +134,38 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 {
                     ArchipelagoConsole.LogMessage("#" + i.ToString());
                     ArchipelagoConsole.LogMessage("ID:" + alist.list[i].Id.ToString());
+                    ArchipelagoConsole.LogMessage("NAME:" + alist.list[i].itemname);
+                    ArchipelagoConsole.LogMessage("LOCID:" + alist.list[i].LocationId.ToString());
+                    ArchipelagoConsole.LogMessage("LOCNAME:" + alist.list[i].locationname);
                     ArchipelagoConsole.LogMessage("PROCESSED:" + alist.list[i].processed.ToString());
                     ArchipelagoConsole.LogMessage("PUTINSHOP:" + alist.list[i].putinshop.ToString());
                     ArchipelagoConsole.LogMessage("------------------------");
                 }
                 ArchipelagoConsole.LogMessage("-----END DEBUG DATA-----");
             }
-            if (msg == "$resync")
+            if (msg == "$resetitems")
             {
                 CursedArchipelagoClient.alist = new ArchipelageItemList();
-                sendJson("{\"cmd\":" + "\"Sync\"}");
+                sendJson("{\"cmd\":\"Sync\"}");
+            }
+            if (msg == "$resync")
+            {
+                sendJson("{\"cmd\":\"Sync\"}");
+            }
+            if (msg == "$deldata")
+            {
+                File.Delete(Application.persistentDataPath + "/archdata");
+            }
+
+            if (msg == "$girls")
+            {
+                List<GirlDefinition> l = GameManager.Data.Girls.GetAll();
+                ArchipelagoConsole.LogMessage("-------GIRL DATA-------");
+                foreach (GirlDefinition g in l)
+                {
+                    ArchipelagoConsole.LogMessage("GIRL ID:" + g.id + " | GIRL NAME:" + g.name);
+                }
+                ArchipelagoConsole.LogMessage("-----END DEBUG DATA-----");
             }
             if (msg == "$items")
             {
@@ -199,6 +223,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 {
                     ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
                 }
+                ArchipelagoConsole.LogMessage("-----END DEBUG DATA-----");
             }
         }
 
@@ -212,12 +237,20 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 {
                     JsonSerializer serializer = new JsonSerializer();
                     ArchipelageItemList savedlist = (ArchipelageItemList)serializer.Deserialize(file, typeof(ArchipelageItemList));
-                    if (alist.seed == savedlist.seed && savedlist.listversion == 2)
+                    if (savedlist.listversion != 2)
+                    {
+                        ArchipelagoConsole.LogMessage($"ARCHDATA version missmatch({savedlist.listversion}!=2) using new archdata");
+                    }
+                    else if (savedlist.seed != alist.seed)
+                    {
+                        ArchipelagoConsole.LogMessage($"ARCHDATA seed missmatch(archdata:{savedlist.seed}!=server:{alist.seed}) using new archdata");
+                    }
+                    else if (alist.seed == savedlist.seed && savedlist.listversion == 2)
                     {
                         ArchipelagoConsole.LogMessage("archdata file found restoring session");
                         if (alist.merge(savedlist.list))
                         {
-                            ArchipelagoConsole.LogMessage("ERROR LOADING SAVED ITEM LIST RESETING ITEM LIST");
+                            ArchipelagoConsole.LogMessage("ERROR LOADING SAVED ARCHDATA RESETING ARCHDATA");
                             alist = new ArchipelageItemList();
                             alist.seed = room.seed_name;
                             sendJson("{\"cmd\":\"Sync\"}");
@@ -225,9 +258,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                     }
                     else
                     {
-                        ArchipelagoConsole.LogMessage("archdata file found but dosent match server seed creating new session");
-                        ArchipelagoConsole.LogMessage(room.seed_name + ": does not equal :" + savedlist.seed);
-                        alist.seed = room.seed_name;
+                        ArchipelagoConsole.LogMessage("ARCHDATA found but an error occoured just going to use new archdata");
                     }
                 }
             }
@@ -235,13 +266,14 @@ namespace HuniePopArchiepelagoClient.Archipelago
             {
                 ArchipelagoConsole.LogMessage("archdata file not found creating new session");
             }
+            ArchipelagoConsole.CommandText = "!help";
         }
 
         public static void msgCallback(string msg)
         {
             if (!msg.StartsWith("{") && !msg.StartsWith("["))
             {
-                ArchipelagoConsole.LogMessage(msg);
+                ArchipelagoConsole.LogImportant(msg);
                 Plugin.curse.error = msg;
                 return;
             }
@@ -263,13 +295,27 @@ namespace HuniePopArchiepelagoClient.Archipelago
             else if (cmd == "ConnectionRefused")
             {
                 ArchipelagoConsole.LogMessage("ConnectionRefused PACKET GOTTEN");
-                ArchipelagoConsole.LogMessage(msg);
+                ArchipelagoConsole.LogImportant(msg);
 
             }
             else if (cmd == "Connected")
             {
                 //ArchipelagoConsole.LogMessage("Connected PACKET GOTTEN");
                 Plugin.curse.connected = JsonConvert.DeserializeObject<ConnectedPacket>(msg);
+                NetworkVersion wv = JsonConvert.DeserializeObject<NetworkVersion>(msgjson["slot_data"]["world_version"].ToString());
+                Plugin.curse.worldver = wv;
+                if (wv.major > Plugin.compatworldmajor)
+                {
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Major version({wv.major}) greater than compatible Major version({Plugin.compatworldmajor}) HIGH chance of errors occurring");
+                }
+                if (wv.minor > Plugin.compatworldminor)
+                {
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Minor version({wv.minor}) greater than compatible Minor version({Plugin.compatworldminor}) HIGH chance of errors occurring");
+                }
+                if (wv.build < Plugin.compatworldbuild)
+                {
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Build version({wv.build}) lower than compatible build version({Plugin.compatworldbuild}) chance of errors occurring");
+                }
                 Plugin.curse.setupdata();
                 Plugin.curse.recievedconnectedpacket = true;
 
@@ -277,6 +323,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
             else if (cmd == "ReceivedItems")
             {
                 //ArchipelagoConsole.LogMessage("ReceivedItems PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage("itempacketmsg:\n" + msg);
                 if (!Plugin.curse.fullconnection)
                 {
                     Plugin.curse.fullconnection = true;
@@ -284,6 +331,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 ReceivedItemsPacket pack = JsonConvert.DeserializeObject<ReceivedItemsPacket>(msg);
                 foreach (NetworkItem item in pack.items)
                 {
+                    Plugin.BepinLogger.LogMessage("adding item");
                     alist.add(item);
                 }
 
@@ -352,10 +400,6 @@ namespace HuniePopArchiepelagoClient.Archipelago
     public class helper
     {
 
-        [DllImport("user32.dll")]
-        public static extern int MessageBox(IntPtr hWnd, string lpText, string lpCaption, uint uType);
-
-
         [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern IntPtr getWS();
 
@@ -366,7 +410,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public static extern void seturlWS(IntPtr ws, string url);
 
         [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
-        public static extern void setcallWS(IntPtr ws, callback call);
+        public static extern void setcallWS(IntPtr ws);
 
         [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
         public static extern void sendWS(IntPtr ws, string msg);
@@ -381,8 +425,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public static extern bool hasmsg(IntPtr ws);
 
         [DllImport("/BepInEx/plugins/Hunie Pop Archipelago Client/DotsWebSocket.dll")]
-        [return: MarshalAs(UnmanagedType.BStr)]
-        public static extern string getmsg(IntPtr ws);
+        public static extern IntPtr getmsg(IntPtr ws);
 
 
     }

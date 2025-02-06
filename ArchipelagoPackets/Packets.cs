@@ -169,8 +169,8 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
     }
     public class NetworkItem
     {
-        public int item;
-        public int location;
+        public long item;
+        public long location;
         public int player;
         public int flags;
     }

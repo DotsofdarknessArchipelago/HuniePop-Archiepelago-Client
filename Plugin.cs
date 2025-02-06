@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 using BepInEx;
 using BepInEx.Logging;
 using HuniePopArchiepelagoClient.Archipelago;
 using HuniePopArchiepelagoClient.Utils;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace HuniePopArchiepelagoClient
@@ -15,7 +18,11 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.4.1";
+        public const string PluginVersion = "0.5.0";
+        public static int compatworldmajor = 0;
+        public static int compatworldminor = 5;
+        public static int compatworldbuild = 0;
+
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
         private const string APDisplayInfo = $"Archipelago v{PluginVersion}";
@@ -44,19 +51,19 @@ namespace HuniePopArchiepelagoClient
 
             try
             {
-                ArchipelagoConsole.LogMessage("DotsWebsocket.dll version:" + helper.dotsV().ToString());
                 ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
-                dll = true;
+                ArchipelagoConsole.LogMessage("DotsWebsocket.dll version:" + helper.dotsV().ToString());
+                if (helper.dotsV() == 2) { dll = true; }
+                else { ArchipelagoConsole.LogMessage("DotsWebsocket Not Correct Version"); }
+
             }
             catch (Exception e)
             {
                 dll = false;
-                ArchipelagoConsole.LogMessage("FATAL ERROR: DotsWebSocket.dll not found");
+                ArchipelagoConsole.LogImportant("FATAL ERROR: DotsWebSocket.dll not found");
                 if (File.Exists("DotsWebSocket.dll"))
                 {
-                    ArchipelagoConsole.Hidden = true;
-                    ArchipelagoConsole.toggle();
-                    ArchipelagoConsole.LogMessage("DotsWebSocket.dll exists but errored on client.\nmake sure you have \"Microsoft Visual C++ Redistributable x86\" version greater than 14.42.34433.0 installed.\nPermalink to latest: https://aka.ms/vs/17/release/vc_redist.x86.exe");
+                    ArchipelagoConsole.LogImportant("DotsWebSocket.dll exists but errored on client.\nmake sure you have \"Microsoft Visual C++ Redistributable x86\" version greater than 14.42.34433.0 installed.\nPermalink to latest: https://aka.ms/vs/17/release/vc_redist.x86.exe");
                 }
             }
 
@@ -67,12 +74,17 @@ namespace HuniePopArchiepelagoClient
             {
                 if (tringtoconnect && helper.hasmsg(curse.ws))
                 {
-                    CursedArchipelagoClient.msgCallback(helper.getmsg(curse.ws));
+                    CursedArchipelagoClient.msgCallback(Marshal.PtrToStringAnsi(helper.getmsg(curse.ws)));
                 }
             }
             if (Input.GetKeyDown(KeyCode.F8))
             {
                 ArchipelagoConsole.toggle();
+            }
+            if (Input.GetKeyDown(KeyCode.Return) && !ArchipelagoConsole.Hidden && !ArchipelagoConsole.CommandText.IsNullOrWhiteSpace())
+            {
+                Plugin.curse.sendSay(ArchipelagoConsole.CommandText);
+                ArchipelagoConsole.CommandText = "";
             }
         }
 
@@ -91,7 +103,7 @@ namespace HuniePopArchiepelagoClient
                 // if your game doesn't usually show the cursor this line may be necessary
                 // Cursor.visible = false;
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 40), "");
-                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.connected.slot_data["world_version"] + "): Status: Connected");
+                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.worldver.major + "." + curse.worldver.minor + "." + curse.worldver.build + "): Status: Connected");
 
             }
             else if (tringtoconnect)

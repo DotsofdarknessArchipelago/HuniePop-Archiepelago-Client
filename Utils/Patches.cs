@@ -197,9 +197,9 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static bool newgirloveride(ref int ____saveFileIndex)
         {
-            if (!Plugin.curse.fullconnection)
+            if (!Plugin.curse.fullconnection && Plugin.tringtoconnect)
             {
-                helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
+                ArchipelagoConsole.LogImportant("There was an error setting up the connection to the server please restart the game and try again");
                 return false; 
             }
 
@@ -244,6 +244,17 @@ namespace HuniePopArchiepelagoClient.Utils
                     }
                 }
 
+                if (CursedArchipelagoClient.alist.list.Count == 0)
+                {
+                    ArchipelagoConsole.LogMessage("ERROR IN SETTING UP SAVE DATA(no items recieved) PLEASE RESTART YOUR GAME");
+                    return false;
+                }
+                if (saveFile.girls[saveFile.currentGirl].metStatus != 3)
+                {
+                    ArchipelagoConsole.LogMessage("ERROR IN SETTING UP SAVE DATA(starting girl not unlocked properly) PLEASE RESTART YOUR GAME");
+                    return false;
+                }
+
                 return true;
 
             }
@@ -255,9 +266,9 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool newguyoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.fullconnection)
+            if (!Plugin.curse.fullconnection && Plugin.tringtoconnect)
             {
-                helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
+                ArchipelagoConsole.LogImportant("There was an error setting up the connection to the server please restart the game and try again");
                 return false;
             }
 
@@ -302,6 +313,17 @@ namespace HuniePopArchiepelagoClient.Utils
                     }
                 }
 
+                if (CursedArchipelagoClient.alist.list.Count == 0)
+                {
+                    ArchipelagoConsole.LogMessage("ERROR IN SETTING UP SAVE DATA(no items recieved) PLEASE RESTART YOUR GAME");
+                    return false;
+                }
+                if (saveFile.girls[saveFile.currentGirl].metStatus != 3)
+                {
+                    ArchipelagoConsole.LogMessage("ERROR IN SETTING UP SAVE DATA(starting girl not unlocked properly) PLEASE RESTART YOUR GAME");
+                    return false;
+                }
+
                 return true;
 
             }
@@ -314,9 +336,9 @@ namespace HuniePopArchiepelagoClient.Utils
         public static bool continueoveride(ref int ____saveFileIndex)
         {
 
-            if (!Plugin.curse.fullconnection)
+            if (!Plugin.curse.fullconnection && Plugin.tringtoconnect)
             {
-                helper.MessageBox(IntPtr.Zero, "There was an error setting up the connection to the server please restart the game and try again", "WEBSOCKET SETUP ERROR", 0);
+                ArchipelagoConsole.LogImportant("There was an error setting up the connection to the server please restart the game and try again");
                 return false;
             }
 
@@ -699,7 +721,7 @@ namespace HuniePopArchiepelagoClient.Utils
                 else if (item.Id > 42069168 && item.Id < 42069217)
                 {
                     //TOKEN ITEMS
-                    ArchipelagoConsole.LogMessage("token recieved");
+                    ArchipelagoConsole.LogMessage($"{item.itemname} recieved");
                     if (item.Id < 42069175)
                     {
                         //TALENT

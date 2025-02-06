@@ -74,11 +74,13 @@ namespace HuniePopArchiepelagoClient.Archipelago
             {
                 if (list[i].Id == netitem.item && list[i].playerslot == netitem.player && list[i].LocationId == netitem.location)
                 {
+                    Plugin.BepinLogger.LogMessage("item already in list skipping");
                     return;
                 }
             }
             ArchipelagoItem item = new ArchipelagoItem(netitem);
             list.Add(item);
+            Plugin.BepinLogger.LogMessage($"item not in list adding:{Plugin.curse.data.data.games["Hunie Pop"].idtoitem[netitem.item]} from loc:{netitem.location} total items={list.Count}");
             //ArchipelagoConsole.LogMessage($"ADDED ITEM TO LIST:{item.itemname} total items={list.Count}");
         }
 

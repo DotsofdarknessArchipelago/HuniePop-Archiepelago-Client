@@ -24,7 +24,7 @@ namespace HuniePopArchiepelagoClient.Utils
         private const int MaxLogLines = 80;
         private const float HideTimeout = 15f;
 
-        private static string CommandText = "!help";
+        public static string CommandText = "";
         private static Rect CommandTextRect;
         private static Rect SendCommandButton;
 
@@ -47,6 +47,12 @@ namespace HuniePopArchiepelagoClient.Utils
             Plugin.BepinLogger.LogMessage(message);
             lastUpdateTime = Time.time;
             UpdateWindow();
+        }
+
+        public static void LogImportant(string message)
+        {
+            LogMessage(message);
+            if (Hidden) { toggle(); }
         }
 
         public static void OnGUI()
