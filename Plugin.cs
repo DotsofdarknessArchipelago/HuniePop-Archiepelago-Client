@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Threading;
 using BepInEx;
 using BepInEx.Logging;
 using HuniePopArchiepelagoClient.Archipelago;
 using HuniePopArchiepelagoClient.Utils;
-using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace HuniePopArchiepelagoClient
@@ -18,9 +14,9 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.5.0";
+        public const string PluginVersion = "0.6.0";
         public static int compatworldmajor = 0;
-        public static int compatworldminor = 5;
+        public static int compatworldminor = 6;
         public static int compatworldbuild = 0;
 
 
@@ -103,7 +99,14 @@ namespace HuniePopArchiepelagoClient
                 // if your game doesn't usually show the cursor this line may be necessary
                 // Cursor.visible = false;
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 40), "");
-                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.worldver.major + "." + curse.worldver.minor + "." + curse.worldver.build + "): Status: Connected");
+                if (curse.worldver == null)
+                {
+                    GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(ERROR VERSION NOT SUPPORTED): Status: Connected");
+                }
+                else
+                {
+                    GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "Client V(" + PluginVersion + "), World V(" + curse.worldver.major + "." + curse.worldver.minor + "." + curse.worldver.build + "): Status: Connected");
+                }
 
             }
             else if (tringtoconnect)

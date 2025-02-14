@@ -8,8 +8,6 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using HuniePopArchiepelagoClient.ArchipelagoPackets;
 using HuniePopArchiepelagoClient.Utils;
-using System.Security.Principal;
-using System.Net.NetworkInformation;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -225,6 +223,47 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 }
                 ArchipelagoConsole.LogMessage("-----END DEBUG DATA-----");
             }
+            if (msg == "$location")
+            {
+                List<LocationDefinition> nor = GameManager.Data.Locations.GetLocationsByType(LocationType.NORMAL);
+                List<LocationDefinition> date = GameManager.Data.Locations.GetLocationsByType(LocationType.DATE);
+
+                ArchipelagoConsole.LogMessage("-------LOCATION DATA-------");
+                ArchipelagoConsole.LogMessage("-------NORMAL LOCATION DATA-------");
+                foreach (LocationDefinition l1 in nor)
+                {
+                    ArchipelagoConsole.LogMessage($"LOC ID: {l1.id} | NAME: {l1.name} | {l1.fullName}");
+                }
+                ArchipelagoConsole.LogMessage("-------END NORMAL LOCATION DATA-------");
+                ArchipelagoConsole.LogMessage("-------DATE LOCATION DATA-------");
+                foreach (LocationDefinition l2 in date)
+                {
+                    ArchipelagoConsole.LogMessage($"LOC ID: {l2.id} | NAME: {l2.name} | {l2.fullName}");
+                }
+                ArchipelagoConsole.LogMessage("-------END DATE LOCATION DATA-------");
+            }
+            if (msg == "$msg")
+            {
+                int i = 0;
+                bool c = true;
+                MessageDefinition data = GameManager.Data.Messages.Get(i);
+                ArchipelagoConsole.LogMessage("-------MESSAGE DATA-------");
+                while (c)
+                {
+                    data = GameManager.Data.Messages.Get(i);
+                    if (data != null)
+                    {
+                        ArchipelagoConsole.LogMessage($"MSG ID: {data.id} | sender: {data.sender.name} | text: {data.messageText}");
+                    }
+                    else
+                    {
+                        ArchipelagoConsole.LogMessage($"MSG ID: {i} | NULL DATA");
+                        if (i > 43) { c=false; }
+                    }
+                    i++;
+                }
+                ArchipelagoConsole.LogMessage("-------END MESSAGE DATA-------");
+            }
         }
 
         public void setupdata()
@@ -288,7 +327,8 @@ namespace HuniePopArchiepelagoClient.Archipelago
             //ArchipelagoConsole.LogMessage("MESSAGE GOTTEN\n" + msg);
             if (cmd == "RoomInfo")
             {
-                //ArchipelagoConsole.LogMessage("RoomInfo PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage("RoomInfo PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage(msg);
                 Plugin.curse.room = JsonConvert.DeserializeObject<RoomInfoPacket>(msg);
                 Plugin.curse.recievedroominfo = true;
             }
@@ -300,22 +340,24 @@ namespace HuniePopArchiepelagoClient.Archipelago
             }
             else if (cmd == "Connected")
             {
-                //ArchipelagoConsole.LogMessage("Connected PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage("Connected PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage(msg);
                 Plugin.curse.connected = JsonConvert.DeserializeObject<ConnectedPacket>(msg);
                 NetworkVersion wv = JsonConvert.DeserializeObject<NetworkVersion>(msgjson["slot_data"]["world_version"].ToString());
                 Plugin.curse.worldver = wv;
-                if (wv.major > Plugin.compatworldmajor)
+                if (wv.major < Plugin.compatworldmajor)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Major version({wv.major}) greater than compatible Major version({Plugin.compatworldmajor}) HIGH chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Major version(>{wv.major}<.{wv.minor}.{wv.build}) lower than compatible Major version(>{Plugin.compatworldmajor}<.{Plugin.compatworldmajor}.{Plugin.compatworldmajor}) HIGH chance of errors occurring");
                 }
-                if (wv.minor > Plugin.compatworldminor)
+                else if (wv.minor < Plugin.compatworldminor)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Minor version({wv.minor}) greater than compatible Minor version({Plugin.compatworldminor}) HIGH chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Minor version({wv.major}.>{wv.minor}<.{wv.build}) lower than compatible Minor version({Plugin.compatworldmajor}.>{Plugin.compatworldmajor}<.{Plugin.compatworldmajor}) HIGH chance of errors occurring");
                 }
-                if (wv.build < Plugin.compatworldbuild)
+                else if (wv.build > Plugin.compatworldbuild)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Build version({wv.build}) lower than compatible build version({Plugin.compatworldbuild}) chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Build version({wv.major}.{wv.minor}.>{wv.build}<) greater than compatible build version({Plugin.compatworldmajor}.{Plugin.compatworldmajor}.>{Plugin.compatworldmajor}<) chance of errors occurring");
                 }
+
                 Plugin.curse.setupdata();
                 Plugin.curse.recievedconnectedpacket = true;
 

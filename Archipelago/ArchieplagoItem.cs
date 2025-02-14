@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using HuniePopArchiepelagoClient.ArchipelagoPackets;
-using HuniePopArchiepelagoClient.Utils;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -91,7 +88,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 if (list.Count == 0)
                 {
                     list = oldlist;
-                    ArchipelagoConsole.LogMessage(list.Count.ToString());
+                    //ArchipelagoConsole.LogMessage(list.Count.ToString());
                     break;
                 }
                 if (i > list.Count)

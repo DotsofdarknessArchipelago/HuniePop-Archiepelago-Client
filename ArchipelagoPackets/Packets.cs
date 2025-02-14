@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using HuniePopArchiepelagoClient.Archipelago;
-using UnityEngine;
 
 namespace HuniePopArchiepelagoClient.ArchipelagoPackets
 {
@@ -155,9 +152,9 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
 
     public class NetworkVersion
     {
-        public int major;
-        public int minor;
-        public int build;
+        public int major = 0;
+        public int minor = 0;
+        public int build = 0;
         public string Class;
     }
     public class NetworkPlayer
