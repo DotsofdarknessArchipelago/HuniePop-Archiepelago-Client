@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using HuniePopArchiepelagoClient.Utils;
 
 namespace HuniePopArchiepelagoClient.ArchipelagoPackets
 {
@@ -128,7 +129,7 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
         {
             foreach (KeyValuePair<string, GameData> i in games)
             {
-                i.Value.setup();
+                i.Value.setup(i.Key);
             }
         }
     }
@@ -284,17 +285,31 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
         public Dictionary<long, string> idtolocation;
         public string checksum;
 
-        public void setup()
+        public void setup(string game)
         {
             Dictionary<long, string> tmpi = new Dictionary<long, string>();
             Dictionary<long, string> tmpl = new Dictionary<long, string>();
             foreach (KeyValuePair<string, long> i in item_name_to_id)
             {
-                tmpi.Add(i.Value, i.Key);
+                try
+                {
+                    tmpi.Add(i.Value, i.Key);
+                }
+                catch (Exception)
+                {
+                    ArchipelagoConsole.LogImportant($"ERROR IN {game}'s DATAPACKAGE. ITEM ID DUIPLICATION WITH ID: {i.Value}");
+                }
             }
             foreach (KeyValuePair<string, long> l in location_name_to_id)
             {
-                tmpl.Add(l.Value, l.Key);
+                try
+                {
+                    tmpl.Add(l.Value, l.Key);
+                }
+                catch (Exception)
+                {
+                    ArchipelagoConsole.LogImportant($"ERROR IN {game}'s DATAPACKAGE. LOCATION ID DUIPLICATION WITH ID: {l.Value}");
+                }
             }
             idtoitem = tmpi;
             idtolocation = tmpl;

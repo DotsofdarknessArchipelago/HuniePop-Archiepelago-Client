@@ -347,15 +347,15 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 Plugin.curse.worldver = wv;
                 if (wv.major < Plugin.compatworldmajor)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Major version(>{wv.major}<.{wv.minor}.{wv.build}) lower than compatible Major version(>{Plugin.compatworldmajor}<.{Plugin.compatworldmajor}.{Plugin.compatworldmajor}) HIGH chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Major version(>{wv.major}<.{wv.minor}.{wv.build}) lower than compatible Major version(>{Plugin.compatworldmajor}<.{Plugin.compatworldminor}.{Plugin.compatworldbuild}) HIGH chance of errors/bugs occurring");
                 }
-                else if (wv.minor < Plugin.compatworldminor)
+                if (wv.minor < Plugin.compatworldminor)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Minor version({wv.major}.>{wv.minor}<.{wv.build}) lower than compatible Minor version({Plugin.compatworldmajor}.>{Plugin.compatworldmajor}<.{Plugin.compatworldmajor}) HIGH chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Minor version({wv.major}.>{wv.minor}<.{wv.build}) lower than compatible Minor version({Plugin.compatworldmajor}.>{Plugin.compatworldminor}<.{Plugin.compatworldbuild}) HIGH chance of errors/bugs occurring");
                 }
-                else if (wv.build > Plugin.compatworldbuild)
+                if (wv.build < Plugin.compatworldbuild)
                 {
-                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Build version({wv.major}.{wv.minor}.>{wv.build}<) greater than compatible build version({Plugin.compatworldmajor}.{Plugin.compatworldmajor}.>{Plugin.compatworldmajor}<) chance of errors occurring");
+                    ArchipelagoConsole.LogImportant($"APVERSION ERROR:Connected World Build version({wv.major}.{wv.minor}.>{wv.build}<) lower than compatible build version({Plugin.compatworldmajor}.{Plugin.compatworldminor}.>{Plugin.compatworldbuild}<) chance of errors/bugs occurring");
                 }
 
                 Plugin.curse.setupdata();
@@ -399,7 +399,8 @@ namespace HuniePopArchiepelagoClient.Archipelago
             }
             else if (cmd == "DataPackage")
             {
-                //ArchipelagoConsole.LogMessage("DataPackage PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage("DataPackage PACKET GOTTEN");
+                Plugin.BepinLogger.LogMessage(msg);
                 Plugin.curse.data = JsonConvert.DeserializeObject<DataPackagePacket>(msg);
                 //ArchipelagoConsole.LogMessage(Plugin.curse.data.data.games.ToString());
                 Plugin.curse.recievedroomdatapackage = true;

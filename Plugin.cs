@@ -14,10 +14,10 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.6.0";
+        public const string PluginVersion = "0.6.1";
         public static int compatworldmajor = 0;
         public static int compatworldminor = 6;
-        public static int compatworldbuild = 0;
+        public static int compatworldbuild = 1;
 
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
@@ -130,7 +130,7 @@ namespace HuniePopArchiepelagoClient
                 if (curse.recievedroomdatapackage)
                 {
                     GUI.Label(new Rect(Screen.width - 295, 80, 300, 20), "-recieved archipelago GetDataPackages packet");
-                    if (!curse.startprocessedroomdatapackage)
+                    if (!curse.startprocessedroomdatapackage && !curse.processeddatapackage)
                     {
                         curse.data.data.setup();
                         curse.processeddatapackage = true;
