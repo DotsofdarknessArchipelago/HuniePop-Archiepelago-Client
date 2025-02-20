@@ -131,6 +131,8 @@ namespace HuniePopArchiepelagoClient.Utils
             }
             if (____activePuzzleGame.isBonusRound && !girlData.gotPanties)
             {
+                girlData.gotPanties = true;
+                girlData.AddPhotoEarned(3);
                 arch.sendLoc(42069001 + (girlData.GetGirlDefinition().id - 1));
             }
         }
@@ -511,9 +513,14 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static void toss(ItemDefinition item)
         {
-            ArchipelagoConsole.LogMessage("ITEM TOSSED WITH ID:" + item.id.ToString());            
+            //ArchipelagoConsole.LogMessage("ITEM TOSSED WITH ID:" + item.id.ToString());
+            if (item.type != ItemType.GIFT && item.type != ItemType.UNIQUE_GIFT)
+            {
+                //ArchipelagoConsole.LogMessage("not important");
+                return;
+            }
             long d = Util.itemidtoarchid(item.id);
-            ArchipelagoConsole.LogMessage("ARCHID:" + d.ToString());
+            //ArchipelagoConsole.LogMessage("ARCHID:" + d.ToString());
             if (d == -1) { return; }
             for (int l = 0; l < CursedArchipelagoClient.alist.list.Count; l++)
             {
