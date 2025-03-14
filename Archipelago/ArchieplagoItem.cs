@@ -121,7 +121,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
             return false;
         }
 
-        public bool hasitem(int flag)
+        public bool hasitem(long flag)
         {
             for (int i = 0; i < list.Count; i++)
             {

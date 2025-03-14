@@ -32,7 +32,7 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
         public int slot;
         public List<NetworkPlayer> players;
         public List<int> missing_locations;
-        public List<int> checked_locaions;
+        public List<int> checked_locations = new List<int>();
         public Dictionary<string, object> slot_data;
         public Dictionary<int, NetworkSlot> slot_info;
         public int hint_points;
@@ -79,9 +79,9 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
             {
                 foreach (int i in this.checked_locaions)
                 {
-                    if (!Plugin.curse.connected.checked_locaions.Contains(i))
+                    if (!Plugin.curse.connected.checked_locations.Contains(i))
                     {
-                        Plugin.curse.connected.checked_locaions.Add(i);
+                        Plugin.curse.connected.checked_locations.Add(i);
                     }
                 }
             }

@@ -8,6 +8,7 @@ using System.IO;
 using Newtonsoft.Json.Linq;
 using HuniePopArchiepelagoClient.ArchipelagoPackets;
 using HuniePopArchiepelagoClient.Utils;
+using System.Security.Policy;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {
@@ -30,9 +31,9 @@ namespace HuniePopArchiepelagoClient.Archipelago
         public const string APVersion = "0.5.0";
         private const string Game = "Hunie Pop";
 
-        string url;
-        string username;
-        string password;
+        public string url;
+        public string username;
+        public string password;
 
         public bool recievedroominfo = false;
         public bool sendroomdatapackage = false;
@@ -54,10 +55,20 @@ namespace HuniePopArchiepelagoClient.Archipelago
             username = u.Trim();
             password = p;
 
-            if (!url.StartsWith("ws://") && !url.StartsWith("wss://"))
+            if (url != "ws://localhost:38281")
             {
-                ArchipelagoConsole.LogImportant("URL supplied does not contain \"ws://\" or \"wss://\" at the start\ni.e. wss://archipelago.gg:12345\nNOTE: if connecting to archipelago.gg use \"wss://\"");
-                return;
+                if (!url.StartsWith("wss://") && !url.StartsWith("ws://"))
+                {
+                    url = "wss://" + url;
+                }
+
+                if (!url.Substring(url.IndexOf("://", StringComparison.Ordinal) + 3).Contains(":"))
+                {
+                    url = url + ":38281";
+                }
+
+                if (url.EndsWith(":"))
+                    url += 38281;
             }
 
             ws = helper.getWS();
@@ -105,6 +116,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
         public void sendLoc(int loc)
         {
+            if (!this.connected.checked_locations.Contains(loc)) {  this.connected.checked_locations.Add(loc); }
             helper.sendWS(ws, "{\"cmd\":\"LocationChecks\",\"locations\":[" + loc + "]}");
         }
 

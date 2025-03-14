@@ -14,10 +14,10 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.6.2";
+        public const string PluginVersion = "0.7.0";
         public static int compatworldmajor = 0;
-        public static int compatworldminor = 6;
-        public static int compatworldbuild = 1;
+        public static int compatworldminor = 7;
+        public static int compatworldbuild = 0;
 
 
         public const string ModDisplayInfo = $"{PluginName} v{PluginVersion}";
@@ -113,7 +113,7 @@ namespace HuniePopArchiepelagoClient
             {
                 DrawSolidBox(new Rect(Screen.width - 300, 10, 300, 200));
                 GUI.Box(new Rect(Screen.width - 300, 10, 300, 200), "");
-                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "-trying to connect to server");
+                GUI.Label(new Rect(Screen.width - 295, 20, 300, 20), "-connecting to:" + curse.url);
                 if (helper.readyWS(curse.ws) == 3)
                 {
                     GUI.Label(new Rect(Screen.width - 295, 40, 300, 20), "-initial server connection established");

@@ -82,13 +82,36 @@ namespace HuniePopArchiepelagoClient.Utils
                 serializer.Serialize(archfile, CursedArchipelagoClient.alist);
             }
 
-            if (player.alphaModeActive)
-            {
-                arch.sendCompletion();
-            }
             if (__instance.currentLocation.type != LocationType.DATE)
             {
                 GameManager.System.Player.RollNewDay();
+            }
+
+            if (Convert.ToBoolean(Plugin.curse.connected.slot_data["goal"]))
+            {
+                if (player.alphaModeActive)
+                {
+                    arch.sendCompletion();
+                }
+            }
+            else
+            {
+                bool goalreached = true;
+
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { if (!player.girls[0].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { if (!player.girls[1].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { if (!player.girls[2].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { if (!player.girls[3].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { if (!player.girls[4].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { if (!player.girls[5].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { if (!player.girls[6].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { if (!player.girls[7].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { if (!player.girls[8].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { if (!player.girls[9].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { if (!player.girls[10].gotPanties) { goalreached = false; } }
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { if (!player.girls[11].gotPanties) { goalreached = false; } }
+
+                if (goalreached) { arch.sendCompletion(); }
             }
 
         }
@@ -151,7 +174,7 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyPrefix]
         public static bool storepurchase(StoreItemSlot storeItemSlot, StoreCellApp __instance, ref int ____currentStoreTab)
         {
-            if (____currentStoreTab == 0)
+            if (____currentStoreTab == 1)
             {
                 ArchipelagoConsole.LogMessage($"PURCHASED ITEM:{storeItemSlot.itemDefinition.name} | ID:{storeItemSlot.itemDefinition.id}");
                 if (storeItemSlot.itemDefinition.id > 42069500)
@@ -433,9 +456,14 @@ namespace HuniePopArchiepelagoClient.Utils
         }
 
         [HarmonyPatch(typeof(GirlManager), "GiveItem")]
-        [HarmonyPrefix]
-        public static void releaseallitems()
+        [HarmonyPostfix]
+        public static void releaseallitems(ItemDefinition item, GirlManager __instance, ref bool __result)
         {
+            if (__result && item.type == ItemType.PANTIES)
+            {
+                arch.sendLoc(item.id-277+ 42069493);
+            }
+
             if (GameManager.System.Player.pantiesTurnedIn.Count >= 12) { arch.sendCompletion(); }
         }
 
@@ -447,22 +475,56 @@ namespace HuniePopArchiepelagoClient.Utils
             {
                 //ArchipelagoConsole.LogMessage("PROCESSING SHOP ITEMS");
                 List<ItemDefinition> p = new List<ItemDefinition>();
+                for (int i = 49; i < 121; i++)
+                {
+                    if (CursedArchipelagoClient.alist.hasitem(Util.itemidtoarchid(i)))
+                    {
+                        p.Add(GameManager.Data.Items.Get(i));
+                    }
+                }
+
+                ListUtils.Shuffle<ItemDefinition>(p);
+                if (p.Count > 12)
+                {
+                    p.RemoveRange(12, p.Count - 12);
+                }
+                for (int l = 0; l < 12; l++)
+                {
+                    if (p.Count > l)
+                    {
+                        //ArchipelagoConsole.LogMessage(p[l].name + " ADDED TO SHOP");
+                        storeList[l].itemDefinition = p[l];
+                        storeList[l].soldOut = false;
+                    }
+                    else
+                    {
+                        storeList[l].itemDefinition = null;
+                        storeList[l].soldOut = true;
+                    }
+                }
+
+                return false;
+            }
+            else if (itemType == ItemType.UNIQUE_GIFT)
+            {
+
+                List<ItemDefinition> p = new List<ItemDefinition>();
+
                 for (int i = 0; i < CursedArchipelagoClient.alist.list.Count; i++)
                 {
-                    if (CursedArchipelagoClient.alist.list[i].putinshop)
+                    if (CursedArchipelagoClient.alist.list[i].putinshop && CursedArchipelagoClient.alist.list[i].Id >= 42069097 && CursedArchipelagoClient.alist.list[i].Id <= 42069168)
                     {
-                        //ArchipelagoConsole.LogMessage("ADDED ARCH ITEM TO STORE LIST");
                         p.Add(GameManager.Data.Items.Get(Util.archidtoitemid(CursedArchipelagoClient.alist.list[i].Id)));
                     }
                 }
-                //ArchipelagoConsole.LogMessage("ARCHITEMS PROCESSED");
+
                 int shopslots = Convert.ToInt32(Plugin.curse.connected.slot_data["number_of_shop_items"]);
                 int[] pre = [293, 294, 295, 296, 297, 298];
-                for (int j=0; j<shopslots; j++)
+                for (int j = 0; j < shopslots; j++)
                 {
-                    if (Plugin.curse.connected.checked_locaions != null)
+                    if (Plugin.curse.connected.checked_locations != null)
                     {
-                        if (Plugin.curse.connected.checked_locaions.Contains(42069501 + j)) { continue; }
+                        if (Plugin.curse.connected.checked_locations.Contains(42069501 + j)) { continue; }
                     }
                     ItemDefinition item = new ItemDefinition();
                     item.type = ItemType.PRESENT;
@@ -497,15 +559,6 @@ namespace HuniePopArchiepelagoClient.Utils
 
                 return false;
             }
-            else if (itemType == ItemType.UNIQUE_GIFT)
-            {
-                for (int l = 0; l < 12; l++)
-                {
-                    storeList[l].itemDefinition = null;
-                    storeList[l].soldOut = true;
-                }
-                return false;
-            }
             return true;
         }
 
@@ -514,7 +567,7 @@ namespace HuniePopArchiepelagoClient.Utils
         public static void toss(ItemDefinition item)
         {
             //ArchipelagoConsole.LogMessage("ITEM TOSSED WITH ID:" + item.id.ToString());
-            if (item.type != ItemType.GIFT && item.type != ItemType.UNIQUE_GIFT)
+            if (item.type != ItemType.UNIQUE_GIFT)
             {
                 //ArchipelagoConsole.LogMessage("not important");
                 return;
@@ -542,6 +595,16 @@ namespace HuniePopArchiepelagoClient.Utils
             if (__instance.type == ItemType.PRESENT)
             {
                 __result = Convert.ToInt32(Plugin.curse.connected.slot_data["shop_item_cost"]);
+                return false;
+            }
+            else if (__instance.type == ItemType.GIFT)
+            {
+                __result = Convert.ToInt32(Plugin.curse.connected.slot_data["shop_gift_cost"]);
+                return false;
+            }
+            else if (__instance.type == ItemType.UNIQUE_GIFT)
+            {
+                __result = 0;
                 return false;
             }
             return true;
@@ -594,6 +657,20 @@ namespace HuniePopArchiepelagoClient.Utils
             }
         }
 
+        [HarmonyPatch(typeof(PlayerManager), "hunie", MethodType.Setter)]
+        [HarmonyPrefix]
+        public static bool hunieoverite(ref int ____hunie)
+        {
+            ____hunie = 0;
+            GameManager.Stage.uiTop.labelHunie.SetText(0);
+            return false;
+        }
+
+
+
+
+
+
 
 
         [HarmonyPatch(typeof(GameManager), "LoadGame")]
@@ -603,6 +680,35 @@ namespace HuniePopArchiepelagoClient.Utils
             for (int i = 0; i < ctx.Instrs.Count; i++)
             {
                 if (ctx.Instrs[i].OpCode == OpCodes.Brtrue) { ctx.Instrs[i].OpCode = OpCodes.Brfalse; break; }
+            }
+        }
+
+        [HarmonyPatch(typeof(ItemTooltipContent), "Refresh")]
+        [HarmonyILManipulator]
+        public static void tooltipreplace(ILContext ctx, MethodBase orig)
+        {
+            for (int i = 0; i < ctx.Instrs.Count; i++)
+            {
+                if (ctx.Instrs[i].OpCode == OpCodes.Ldstr && ctx.Instrs[i].Operand.ToString() == "[[Not enough Hunie to order.]stop]") { ctx.Instrs[i].Operand = "[[Buying Gifts is disabled.]stop]"; }
+            }
+        }
+
+        [HarmonyPatch(typeof(ActionMenuButton), "Refresh")]
+        [HarmonyILManipulator]
+        public static void talkedit(ILContext ctx, MethodBase orig)
+        {
+            bool plus = true;
+            bool fifty = true;
+            bool hunie = true;
+            for (int i = 0; i < ctx.Instrs.Count; i++)
+            {
+                if (plus && ctx.Instrs[i].OpCode == OpCodes.Ldstr && ctx.Instrs[i].Operand.ToString() == "+") { ctx.Instrs[i].Operand = ""; plus = false; continue; }
+                if (hunie && ctx.Instrs[i].OpCode == OpCodes.Ldstr && ctx.Instrs[i].Operand.ToString() == " Hunie") { ctx.Instrs[i].Operand = ""; hunie = false; break; }
+                if (fifty && ctx.Instrs[i].OpCode == OpCodes.Ldc_R4 && ctx.Instrs[i].Operand.ToString() == "50") { ctx.Instrs[i].OpCode = OpCodes.Ldstr; ctx.Instrs[i].Operand = "Dont Just Stare"; fifty = false; continue; }
+                if (!plus)
+                {
+                    ctx.Instrs[i].OpCode = OpCodes.Nop;
+                }
             }
         }
 
@@ -728,6 +834,7 @@ namespace HuniePopArchiepelagoClient.Utils
                     {
                         player.AddItem(GameManager.Data.Items.Get(archidtoitemid(item.Id)), player.inventory, false, false);
                         ArchipelagoConsole.LogMessage(GameManager.Data.Items.Get(archidtoitemid(item.Id)).name + " recieved");
+                        ArchipelagoConsole.LogMessage(GameManager.Data.Items.Get(archidtoitemid(item.Id)).name + " can now be bought in the shop");
                         item.processed = true;
                     }
                 }
