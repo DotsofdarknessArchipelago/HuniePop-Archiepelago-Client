@@ -383,9 +383,9 @@ namespace HuniePopArchiepelagoClient.Archipelago
                     Plugin.curse.fullconnection = true;
                 }
                 ReceivedItemsPacket pack = JsonConvert.DeserializeObject<ReceivedItemsPacket>(msg);
+                Plugin.BepinLogger.LogMessage("adding items");
                 foreach (NetworkItem item in pack.items)
                 {
-                    Plugin.BepinLogger.LogMessage("adding item");
                     alist.add(item);
                 }
 

@@ -372,6 +372,12 @@ namespace HuniePopArchiepelagoClient.Utils
             }
 
             if (____saveFileIndex != 3) { return false; }
+            bool n = false;
+            foreach (ArchipelagoItem i in CursedArchipelagoClient.alist.list)
+            {
+                if (!i.processed) { n= true; break; }
+            }
+            if (n) { ArchipelagoConsole.LogMessage("Items need to be processed please move locations to process them"); }
             return true;
         }
 

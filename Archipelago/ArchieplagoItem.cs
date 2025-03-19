@@ -56,6 +56,15 @@ namespace HuniePopArchiepelagoClient.Archipelago
             this.LocationId = -1;
         }
 
+        public bool equals(ArchipelagoItem i2)
+        {
+            if(i2 == null) return false;
+            if(this.Id != i2.Id) return false;
+            if(this.LocationId != i2.LocationId) return false;
+            if(this.playerslot != i2.playerslot) return false;
+            return true;
+        }
+
     }
 
     public class ArchipelageItemList
@@ -71,53 +80,38 @@ namespace HuniePopArchiepelagoClient.Archipelago
             {
                 if (list[i].Id == netitem.item && list[i].playerslot == netitem.player && list[i].LocationId == netitem.location)
                 {
-                    Plugin.BepinLogger.LogMessage("item already in list skipping");
+                    Plugin.BepinLogger.LogMessage($"-item({Plugin.curse.data.data.games["Hunie Pop"].idtoitem[netitem.item]} from loc:{netitem.location} total items={list.Count}) already in list skipping");
                     return;
                 }
             }
             ArchipelagoItem item = new ArchipelagoItem(netitem);
             list.Add(item);
-            Plugin.BepinLogger.LogMessage($"item not in list adding:{Plugin.curse.data.data.games["Hunie Pop"].idtoitem[netitem.item]} from loc:{netitem.location} total items={list.Count}");
-            //ArchipelagoConsole.LogMessage($"ADDED ITEM TO LIST:{item.itemname} total items={list.Count}");
+            Plugin.BepinLogger.LogMessage($"+item({Plugin.curse.data.data.games["Hunie Pop"].idtoitem[netitem.item]} from loc:{netitem.location} total items={list.Count}) not in list adding");
         }
 
         public bool merge(List<ArchipelagoItem> oldlist)
         {
+            if (oldlist.Count == 0) { return true; }
+            if (list.Count == 0) { list = oldlist; return false; }
+
             for (int i = 0; i < oldlist.Count; i++)
             {
-                if (list.Count == 0)
+                bool f = true;
+                for (int j = 0; j < list.Count; j++)
                 {
-                    list = oldlist;
-                    //ArchipelagoConsole.LogMessage(list.Count.ToString());
-                    break;
+                    if (list[j].equals(oldlist[i]))
+                    {
+                        list[j] = oldlist[i];
+                        f = false;
+                        break;
+                    }
                 }
-                if (i > list.Count)
-                {
-                    ArchipelagoItem tmp = new ArchipelagoItem();
-                    tmp.Id = oldlist[i].Id;
-                    tmp.LocationId = oldlist[i].LocationId;
-                    tmp.playerslot = oldlist[i].playerslot;
-                    tmp.playername = oldlist[i].playername;
-                    tmp.itemname = oldlist[i].itemname;
-                    tmp.locationname = oldlist[i].locationname;
-                    tmp.processed = oldlist[i].processed;
-                    tmp.putinshop = oldlist[i].putinshop;
-                    list.Add(tmp);
-                    continue;
-                }
-                if (list[i].Id != oldlist[i].Id && list[i].playerslot != oldlist[i].playerslot && list[i].LocationId != oldlist[i].LocationId)
+                if (f)
                 {
                     return true;
                 }
-                list[i].Id = oldlist[i].Id;
-                list[i].LocationId = oldlist[i].LocationId;
-                list[i].playerslot = oldlist[i].playerslot;
-                list[i].playername = oldlist[i].playername;
-                list[i].itemname = oldlist[i].itemname;
-                list[i].locationname = oldlist[i].locationname;
-                list[i].processed = oldlist[i].processed;
-                list[i].putinshop = oldlist[i].putinshop;
             }
+
             return false;
         }
 
