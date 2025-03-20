@@ -530,7 +530,7 @@ namespace HuniePopArchiepelagoClient.Utils
                 {
                     if (Plugin.curse.connected.checked_locations != null)
                     {
-                        if (Plugin.curse.connected.checked_locations.Contains(42069501 + j)) { continue; }
+                        if (Plugin.curse.connected.checked_locations.Contains(42069511 + j)) { continue; }
                     }
                     ItemDefinition item = new ItemDefinition();
                     item.type = ItemType.PRESENT;
@@ -538,7 +538,7 @@ namespace HuniePopArchiepelagoClient.Utils
                     item.iconName = GameManager.Data.Items.Get(pre[UnityEngine.Random.Range(0, pre.Count() - 1)]).iconName;
 
                     item.name = "ARCH ITEM:" + (j + 1).ToString();
-                    item.id = 42069501 + j;
+                    item.id = 42069511 + j;
                     item.description = "LOCATION CHECK FOR ARCHIPELAGO WILL BE REMOVED FROM INVENTORY WHEN MOVING LOCATIONS";
                     p.Add(item);
                 }
