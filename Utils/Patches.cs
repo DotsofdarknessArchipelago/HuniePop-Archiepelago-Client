@@ -176,10 +176,10 @@ namespace HuniePopArchiepelagoClient.Utils
         {
             if (____currentStoreTab == 1)
             {
-                ArchipelagoConsole.LogMessage($"PURCHASED ITEM:{storeItemSlot.itemDefinition.name} | ID:{storeItemSlot.itemDefinition.id}");
                 if (storeItemSlot.itemDefinition.id > 42069500)
                 {
-                    ArchipelagoConsole.LogMessage("SENDING LOCATION");
+                    ArchipelagoConsole.LogMessage($"PURCHASED ITEM:{storeItemSlot.itemDefinition.name}");
+                    ArchipelagoConsole.LogMessage($"SENDING LOCATION {storeItemSlot.itemDefinition.id}");
                     Plugin.curse.sendLoc(storeItemSlot.itemDefinition.id);
                     return true;
                 }
@@ -456,8 +456,47 @@ namespace HuniePopArchiepelagoClient.Utils
 
         [HarmonyPatch(typeof(GirlProfileCellApp), "OnCollectionSlotPressed")]
         [HarmonyPrefix]
-        public static bool collectionoverite()
+        public static bool collectionoverite(GirlProfileCollectionSlot collectionSlot, ref GirlProfileCellApp __instance)
         {
+            //ArchipelagoConsole.LogMessage($"trying to buy {collectionSlot.itemDefinition.name} from collection page");
+            int hunie = Convert.ToInt32(Plugin.curse.connected.slot_data["hunie_gift_cost"]);
+            if (collectionSlot.itemDefinition.type == ItemType.GIFT && 
+                GameManager.System.GameState == GameState.SIM && 
+                !GameManager.System.Player.IsInventoryFull(GameManager.System.Player.inventory) && 
+                GameManager.System.Player.hunie >= hunie && 
+                CursedArchipelagoClient.alist.hasitem(Util.itemidtoarchid(collectionSlot.itemDefinition.id)))
+            {
+                //ArchipelagoConsole.LogMessage($"successfully buying {collectionSlot.itemDefinition.name} from collection page for {hunie}");
+                GameManager.System.Player.AddItem(collectionSlot.itemDefinition, GameManager.System.Player.inventory, true, false);
+                GameManager.System.Player.hunie -= hunie;
+                GameManager.System.Audio.Play(AudioCategory.SOUND, __instance.orderItemSound, false, 1f, true);
+                GameManager.Stage.cellNotifications.Notify(CellNotificationType.INVENTORY, GirlManager.FAIRY_PRESENT_NOTIFICATIONS[global::UnityEngine.Random.Range(0, GirlManager.FAIRY_PRESENT_NOTIFICATIONS.Length)]);
+                __instance.Refresh();
+                GameManager.Stage.tooltip.Refresh();
+            }
+            return false;
+        }
+
+        [HarmonyPatch(typeof(GirlProfileCollectionSlot), "Refresh")]
+        [HarmonyPrefix]
+        public static bool collectionoverite2(GirlProfileCollectionSlot __instance)
+        {
+            if (__instance.itemDefinition != null &&
+                __instance.itemDefinition.type == ItemType.GIFT && 
+                GameManager.System.GameState == GameState.SIM && 
+                GameManager.System.Player.endingSceneShown && 
+                !GameManager.System.Player.IsInventoryFull(GameManager.System.Player.inventory) &&
+                GameManager.System.Player.hunie >= Convert.ToInt32(Plugin.curse.connected.slot_data["hunie_gift_cost"]) &&
+                CursedArchipelagoClient.alist.hasitem(Util.itemidtoarchid(__instance.itemDefinition.id)))
+            {
+                __instance.button.Enable();
+                //base.button.Enable();
+            }
+            else
+            {
+                __instance.button.Disable();
+                //base.button.Disable();
+            }
             return false;
         }
 
@@ -663,13 +702,48 @@ namespace HuniePopArchiepelagoClient.Utils
             }
         }
 
-        [HarmonyPatch(typeof(PlayerManager), "hunie", MethodType.Setter)]
+        [HarmonyPatch(typeof(ItemTooltipContent), "Refresh")]
         [HarmonyPrefix]
-        public static bool hunieoverite(ref int ____hunie)
+        public static void tooltipoverite(ref ItemTooltipContent __instance, ref ItemDefinition ____itemDefinition, ref bool ____collectionItem)
         {
-            ____hunie = 0;
-            GameManager.Stage.uiTop.labelHunie.SetText(0);
-            return false;
+            if(____itemDefinition != null && ____itemDefinition.type == ItemType.GIFT)
+            {
+                __instance.typeLabel.SetText(StringUtils.Titleize(____itemDefinition.type.ToString()) + "  |  " + StringUtils.Titleize(____itemDefinition.giftType.ToString()));
+                __instance.valueLabel.SetText("Gift Value: " + ____itemDefinition.itemFunctionValue.ToString());
+                __instance.nameLabel.SetColor(ColorUtils.HexToColor("A63E6E"));
+                __instance.typeLabel.SetColor(ColorUtils.HexToColor("C06E94"));
+                __instance.valueLabel.SetColor(ColorUtils.HexToColor("A16799"));
+                if (____collectionItem && GameManager.System.Player.endingSceneShown)
+                {
+                    string text = __instance.valueLabel.label.text + "\n";
+                    string text2 = ColorUtils.ColorToHex(__instance.valueLabel.label.color);
+                    if (GameManager.System.GameState != GameState.SIM)
+                    {
+                        text += "[[Can't order while dating.]stop]";
+                    }
+                    else if (GameManager.System.Player.IsInventoryFull(GameManager.System.Player.inventory))
+                    {
+                        text += "[[Your inventory is too full.]stop]";
+                    }
+                    else if(CursedArchipelagoClient.alist.hasitem(Util.itemidtoarchid(____itemDefinition.id)))
+                    {
+                        if (GameManager.System.Player.hunie < Convert.ToInt32(Plugin.curse.connected.slot_data["hunie_gift_cost"]))
+                        {
+                            text += "[[Not enough Hunie to order.]stop]";
+                        }
+                        else
+                        {
+                            text += $"[[Click to order ({Convert.ToInt32(Plugin.curse.connected.slot_data["hunie_gift_cost"])} Hunie).]go]";
+                        }
+                    }
+                    else
+                    {
+                        text += "[[Item can't be ordered yet.]stop]";
+                    }
+                    __instance.valueLabel.SetColor(Color.white);
+                    __instance.valueLabel.SetText(StringUtils.FlattenColorBunches(text, text2));
+                }
+            }
         }
 
 
@@ -693,9 +767,22 @@ namespace HuniePopArchiepelagoClient.Utils
         [HarmonyILManipulator]
         public static void tooltipreplace(ILContext ctx, MethodBase orig)
         {
-            for (int i = 0; i < ctx.Instrs.Count; i++)
+            for (int i = 10; i < ctx.Instrs.Count; i++)
             {
-                if (ctx.Instrs[i].OpCode == OpCodes.Ldstr && ctx.Instrs[i].Operand.ToString() == "[[Not enough Hunie to order.]stop]") { ctx.Instrs[i].Operand = "[[Buying Gifts is disabled.]stop]"; }
+                if (ctx.Instrs[i].OpCode == OpCodes.Ldarg_0 && 
+                    ctx.Instrs[i-1].OpCode == OpCodes.Br  && 
+                    ctx.Instrs[i-2].OpCode == OpCodes.Callvirt &&
+                    ctx.Instrs[i-3].OpCode == OpCodes.Call &&
+                    ctx.Instrs[i-4].OpCode == OpCodes.Ldstr &&
+                    ctx.Instrs[i-4].Operand.ToString() == "508591")
+                {
+                    for (int j = 0; j < 107; j++)
+                    {
+                        ctx.Instrs[i + j].OpCode = OpCodes.Nop;
+                    }
+                    break;
+                }
+                //if (ctx.Instrs[i].OpCode == OpCodes.Ldstr && ctx.Instrs[i].Operand.ToString() == "[[Not enough Hunie to order.]stop]") { ctx.Instrs[i].Operand = "[[Buying Gifts is disabled.]stop]"; }
             }
         }
 
