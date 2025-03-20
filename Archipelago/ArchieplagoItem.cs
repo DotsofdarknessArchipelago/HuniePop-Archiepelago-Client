@@ -46,7 +46,14 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 }
             }
             this.playername = playername;
-            this.locationname = Plugin.curse.data.data.games[game].idtolocation[item.location];
+            if (this.LocationId <= 0)
+            {
+                this.locationname = "SERVER";
+            }
+            else
+            {
+                this.locationname = Plugin.curse.data.data.games[game].idtolocation[item.location];
+            }
         }
 
         public ArchipelagoItem()

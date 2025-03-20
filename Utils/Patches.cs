@@ -655,7 +655,7 @@ namespace HuniePopArchiepelagoClient.Utils
         {
             if (id == 43)
             {
-                __result.messageText = "NOTE pressing F8 will expand the console at the top of the screen with the abiltiy to send commands to the archipelago server";
+                __result.messageText = "NOTE pressing F8 will expand the console at the top of the screen with the ability to send commands to the archipelago server";
             }
             if (id == 38)
             {

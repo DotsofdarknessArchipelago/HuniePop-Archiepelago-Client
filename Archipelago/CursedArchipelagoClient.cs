@@ -386,7 +386,14 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 Plugin.BepinLogger.LogMessage("adding items");
                 foreach (NetworkItem item in pack.items)
                 {
-                    alist.add(item);
+                    try
+                    {
+                        alist.add(item);
+                    }
+                    catch (Exception)
+                    {
+                        ArchipelagoConsole.LogImportant($"EXCEPTION RECIEVING ITEM:(id:{item.item}, location:{item.location}, player:{item.player}, flags:{item.flags}) please send details to dev for fixing");
+                    }
                 }
 
             }
