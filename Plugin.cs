@@ -14,9 +14,9 @@ namespace HuniePopArchiepelagoClient
     {
         public const string PluginGUID = "Dots.Archipelago.huniepop";
         public const string PluginName = "Hunie Pop";
-        public const string PluginVersion = "0.8.0";
-        public static int compatworldmajor = 0;
-        public static int compatworldminor = 8;
+        public const string PluginVersion = "1.0.0";
+        public static int compatworldmajor = 1;
+        public static int compatworldminor = 0;
         public static int compatworldbuild = 0;
 
 
@@ -49,7 +49,7 @@ namespace HuniePopArchiepelagoClient
             {
                 ArchipelagoConsole.LogMessage($"{ModDisplayInfo} loaded!");
                 ArchipelagoConsole.LogMessage("DotsWebsocket.dll version:" + helper.dotsV().ToString());
-                if (helper.dotsV() == 2) { dll = true; }
+                if (helper.dotsV() == 3) { dll = true; }
                 else { ArchipelagoConsole.LogMessage("DotsWebsocket Not Correct Version"); }
 
             }

@@ -158,9 +158,14 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 CursedArchipelagoClient.alist = new ArchipelageItemList();
                 sendJson("{\"cmd\":\"Sync\"}");
             }
+            if (msg == "$sync")
+            {
+                sendJson("{\"cmd\":\"Sync\"}");
+            }
             if (msg == "$resync")
             {
                 sendJson("{\"cmd\":\"Sync\"}");
+                resync();
             }
             if (msg == "$deldata")
             {
@@ -455,6 +460,48 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 ArchipelagoConsole.LogMessage($"{msg}");
             }
 
+        }
+
+        public void resync()
+        {
+            SaveFile saveFile = SaveUtils.GetSaveFile(3);
+            if (saveFile == null || !saveFile.started) { return; }
+            ArchipelagoConsole.LogMessage($"re-sending all locations");
+
+            for (int i = 0; i < 13; i++)
+            {
+                if (!saveFile.girls.ContainsKey(i)) { continue; }
+
+                GirlSaveData girl = saveFile.girls[i];
+                if (girl == null || girl.metStatus != 3) { continue; }
+
+                GirlDefinition girldef = GameManager.Data.Girls.Get(i);
+                ArchipelagoConsole.LogMessage($"re-sending all {girldef.name}'s locations aquired");
+                if (girl.relationshipLevel > 1) { sendLoc(42069013 + ((girldef.id - 1) * 4)); }
+                if (girl.relationshipLevel > 2) { sendLoc(42069014 + ((girldef.id - 1) * 4)); }
+                if (girl.relationshipLevel > 3) { sendLoc(42069015 + ((girldef.id - 1) * 4)); }
+                if (girl.relationshipLevel > 4) { sendLoc(42069016 + ((girldef.id - 1) * 4)); }
+                if (girl.gotPanties) { sendLoc(42069001 + (girldef.id - 1)); }
+
+                foreach (int gift in girl.collection)
+                {
+                    sendLoc(42069061 + ((girldef.id - 1) * 24) + gift);
+                }
+
+                for (int j = 0; j < 12; j++)
+                {
+                    if (girl.details[j]) { sendLoc(42069349 + j + (12 * (girldef.id - 1))); }
+                }
+            }
+            ArchipelagoConsole.LogMessage($"all girl location re-sent");
+            ArchipelagoConsole.LogMessage($"re-sending all panties turned in locations");
+
+            for (int i = 0; i < 12; i++)
+            {
+                if (saveFile.pantiesTurnedIn.Contains(i+ 277)) { sendLoc(i + 42069493); }
+            }
+            ArchipelagoConsole.LogMessage($"all panties turned in locations re-sent");
+            ArchipelagoConsole.LogMessage($"all locations re-sent");
         }
     }
 
