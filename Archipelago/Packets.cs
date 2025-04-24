@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using HuniePopArchiepelagoClient.Utils;
 
-namespace HuniePopArchiepelagoClient.ArchipelagoPackets
+namespace HuniePopArchiepelagoClient.Archipelago
 {
     public class RoomInfoPacket
     {
@@ -75,9 +74,9 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
 
         public void update()
         {
-            if (this.checked_locaions != null)
+            if (checked_locaions != null)
             {
-                foreach (int i in this.checked_locaions)
+                foreach (int i in checked_locaions)
                 {
                     if (!Plugin.curse.connected.checked_locations.Contains(i))
                     {
@@ -85,9 +84,9 @@ namespace HuniePopArchiepelagoClient.ArchipelagoPackets
                     }
                 }
             }
-            if(this.hint_points != null)
+            if (hint_points != null)
             {
-                Plugin.curse.connected.hint_points = this.hint_points;
+                Plugin.curse.connected.hint_points = hint_points;
             }
         }
     }

@@ -6,9 +6,6 @@ using UnityEngine;
 using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
-using HuniePopArchiepelagoClient.ArchipelagoPackets;
-using HuniePopArchiepelagoClient.Utils;
-using System.Security.Policy;
 
 namespace HuniePopArchiepelagoClient.Archipelago
 {

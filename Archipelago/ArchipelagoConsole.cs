@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using BepInEx;
-using HuniePopArchiepelagoClient.Archipelago;
 using UnityEngine;
 
-namespace HuniePopArchiepelagoClient.Utils
+namespace HuniePopArchiepelagoClient.Archipelago
 {
     // shamelessly stolen from oc2-modding https://github.com/toasterparty/oc2-modding/blob/main/OC2Modding/GameLog.cs
     public static class ArchipelagoConsole

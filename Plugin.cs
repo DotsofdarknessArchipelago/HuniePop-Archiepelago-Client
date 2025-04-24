@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using BepInEx;
 using BepInEx.Logging;
+using HarmonyLib;
 using HuniePopArchiepelagoClient.Archipelago;
-using HuniePopArchiepelagoClient.Utils;
 using UnityEngine;
 
 namespace HuniePopArchiepelagoClient
@@ -43,7 +44,7 @@ namespace HuniePopArchiepelagoClient
             curse = new CursedArchipelagoClient();
             ArchipelagoConsole.Awake();
 
-            Patches.patch(curse);
+            new Harmony(PluginGUID).PatchAll();
 
             try
             {
