@@ -15,8 +15,6 @@ namespace HuniePopArchiepelagoClient.Archipelago
     public class CursedArchipelagoClient
     {
 
-        public static callback myCallBack = new callback(tmp);
-
         public RoomInfoPacket room;
         public DataPackagePacket data;
         public ConnectedPacket connected;
@@ -82,55 +80,8 @@ namespace HuniePopArchiepelagoClient.Archipelago
             helper.startWS(ws);
         }
 
-        public static void tmp(string g)
-        {
-
-        }
-
-        public void sendConnectPacket()
-        {
-            if (helper.readyWS(ws) != 3) { return; }
-            string pack = "{\"cmd\":\"Connect\",\"game\":\"" + Game + "\",\"name\":\"" + username + "\",\"password\":\"" + password + "\",\"uuid\":\"" + Guid.NewGuid().ToString() + "\",\"version\":{\"major\":0,\"minor\":5,\"build\":1,\"class\":\"Version\"},\"tags\":[\"AP\"],\"items_handling\":7,\"slot_data\":true}";
-            helper.sendWS(ws, pack);
-        }
-
-        public void sendGetPackage()
-        {
-            if (helper.readyWS(ws) != 3) { return; }
-            string games = "";
-            for (int i = 0; i < room.games.Count(); i++)
-            {
-                if (i == 0) { games = "\""+room.games[i]+"\""; continue; }
-                games += ",\"" + room.games[i] + "\"";
-            }
-            helper.sendWS(ws, "{\"cmd\":\"GetDataPackage\", \"games\":[" + games + "]}");
-        }
-
-        public void sendJson(string json)
-        {
-            helper.sendWS(ws, json);
-        }
-
-        public void sendLoc(int loc)
-        {
-            if (!this.connected.checked_locations.Contains(loc)) {  this.connected.checked_locations.Add(loc); }
-            helper.sendWS(ws, "{\"cmd\":\"LocationChecks\",\"locations\":[" + loc + "]}");
-        }
-
-        public void sendCompletion()
-        {
-            helper.sendWS(ws, "{\"cmd\":\"StatusUpdate\",\"status\":" + 30 + "}");
-        }
-
-        public void sendSay(string msg)
-        {
-            if (msg.StartsWith("$")) { code(msg); return; }
-            helper.sendWS(ws, "{\"cmd\":\"Say\",\"text\":\"" + msg + "\"}");
-        }
-
         public void code(string msg)
         {
-
             ArchipelagoConsole.LogMessage($"CODE ENTERED: {msg}");
             if (msg == "$archdata")
             {
@@ -168,7 +119,79 @@ namespace HuniePopArchiepelagoClient.Archipelago
             {
                 File.Delete(Application.persistentDataPath + "/archdata");
             }
+            if (msg == "$goal")
+            {
+                SaveFile saveFile = SaveUtils.GetSaveFile(3);
+                PlayerManager player = GameManager.System.Player;
+                if (saveFile == null || !saveFile.started || GameManager.System.GameState == GameState.LOADING || GameManager.System.GameState == GameState.TITLE) { return; }
+                
+                int offset = 0;
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { offset++; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { offset++; }
 
+                if (Convert.ToBoolean(Plugin.curse.connected.slot_data["goal"]))
+                {
+                    int p = 0;
+                    string s = "";
+                    ArchipelagoConsole.LogMessage("Your goal is to give kyu panties");
+
+                    for (int i = 1; i < 13; i++)
+                    {
+                        if (player.pantiesTurnedIn.Count() == 0 || !player.pantiesTurnedIn.Contains(i + 276))
+                        {
+                            if (s != "") { s += ", "; }
+                            s += GameManager.Data.Girls.Get(i).firstName;
+                        }
+                        else
+                        {
+                            p++;
+                        }
+                    }
+
+                    ArchipelagoConsole.LogMessage($"Number of panties turned in: {p-offset}");
+                    ArchipelagoConsole.LogMessage($"Girls panties left to give to kyu: {s}");
+
+                }
+                else
+                {
+                    int p = 0;
+                    string s = "";
+                    ArchipelagoConsole.LogMessage("Your goal is to have sex with all the girls");
+
+                    foreach (GirlPlayerData girl in player.girls)
+                    {
+                        if (!girl.gotPanties)
+                        {
+                            if (s != "") { s += ", "; }
+                            s += girl.GetGirlDefinition().firstName;
+                        }
+                        else
+                        {
+                            p++;
+                        }
+                    }
+
+                    ArchipelagoConsole.LogMessage($"Number of girls that you have had sex with: {p-offset}");
+                    ArchipelagoConsole.LogMessage($"Girls you still need to have sex with: {s}");
+                }
+            }
+            if (msg == "$test")
+            {
+                ArchipelagoConsole.LogMessage($"Your gamestate is {GameManager.System.GameState}");
+            }
+
+
+            //pulling game data
             if (msg == "$girls")
             {
                 List<GirlDefinition> l = GameManager.Data.Girls.GetAll();
@@ -191,7 +214,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
                 List<ItemDefinition> list8 = GameManager.Data.Items.GetAllOfType(ItemType.PRESENT, false);
                 List<ItemDefinition> list9 = GameManager.Data.Items.GetAllOfType(ItemType.MISC, false);
                 ArchipelagoConsole.LogMessage("-------FOOD DATA-------");
-                foreach(ItemDefinition i in list)
+                foreach (ItemDefinition i in list)
                 {
                     ArchipelagoConsole.LogMessage("ITEM ID:" + i.id + " | ITEM NAME:" + i.name);
                 }
@@ -272,12 +295,53 @@ namespace HuniePopArchiepelagoClient.Archipelago
                     else
                     {
                         ArchipelagoConsole.LogMessage($"MSG ID: {i} | NULL DATA");
-                        if (i > 43) { c=false; }
+                        if (i > 43) { c = false; }
                     }
                     i++;
                 }
                 ArchipelagoConsole.LogMessage("-------END MESSAGE DATA-------");
             }
+        }
+
+        public void sendConnectPacket()
+        {
+            if (helper.readyWS(ws) != 3) { return; }
+            string pack = "{\"cmd\":\"Connect\",\"game\":\"" + Game + "\",\"name\":\"" + username + "\",\"password\":\"" + password + "\",\"uuid\":\"" + Guid.NewGuid().ToString() + "\",\"version\":{\"major\":0,\"minor\":5,\"build\":1,\"class\":\"Version\"},\"tags\":[\"AP\"],\"items_handling\":7,\"slot_data\":true}";
+            helper.sendWS(ws, pack);
+        }
+
+        public void sendGetPackage()
+        {
+            if (helper.readyWS(ws) != 3) { return; }
+            string games = "";
+            for (int i = 0; i < room.games.Count(); i++)
+            {
+                if (i == 0) { games = "\"" + room.games[i] + "\""; continue; }
+                games += ",\"" + room.games[i] + "\"";
+            }
+            helper.sendWS(ws, "{\"cmd\":\"GetDataPackage\", \"games\":[" + games + "]}");
+        }
+
+        public void sendJson(string json)
+        {
+            helper.sendWS(ws, json);
+        }
+
+        public void sendLoc(int loc)
+        {
+            if (!this.connected.checked_locations.Contains(loc)) { this.connected.checked_locations.Add(loc); }
+            helper.sendWS(ws, "{\"cmd\":\"LocationChecks\",\"locations\":[" + loc + "]}");
+        }
+
+        public void sendCompletion()
+        {
+            helper.sendWS(ws, "{\"cmd\":\"StatusUpdate\",\"status\":" + 30 + "}");
+        }
+
+        public void sendSay(string msg)
+        {
+            if (msg.StartsWith("$")) { code(msg); return; }
+            helper.sendWS(ws, "{\"cmd\":\"Say\",\"text\":\"" + msg + "\"}");
         }
 
         public void setupdata()
@@ -495,7 +559,7 @@ namespace HuniePopArchiepelagoClient.Archipelago
 
             for (int i = 0; i < 12; i++)
             {
-                if (saveFile.pantiesTurnedIn.Contains(i+ 277)) { sendLoc(i + 42069493); }
+                if (saveFile.pantiesTurnedIn.Contains(i + 277)) { sendLoc(i + 42069493); }
             }
             ArchipelagoConsole.LogMessage($"all panties turned in locations re-sent");
             ArchipelagoConsole.LogMessage($"all locations re-sent");

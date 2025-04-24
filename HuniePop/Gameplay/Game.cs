@@ -50,18 +50,18 @@ namespace HuniePopArchiepelagoClient.HuniePop.Gameplay
                 saveFile.tutorialStep = 10;
 
                 //if a girl is disabled in logic add their panties to panties turned in to allow for completion goal
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); }
-                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288); }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["tiffany_enabled"])) { saveFile.pantiesTurnedIn.Add(277); saveFile.girls[1].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["aiko_enabled"])) { saveFile.pantiesTurnedIn.Add(278); saveFile.girls[2].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyanna_enabled"])) { saveFile.pantiesTurnedIn.Add(279); saveFile.girls[3].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["audrey_enabled"])) { saveFile.pantiesTurnedIn.Add(280); saveFile.girls[4].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["lola_enabled"])) { saveFile.pantiesTurnedIn.Add(281); saveFile.girls[5].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["nikki_enabled"])) { saveFile.pantiesTurnedIn.Add(282); saveFile.girls[6].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["jessie_enabled"])) { saveFile.pantiesTurnedIn.Add(283); saveFile.girls[7].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["beli_enabled"])) { saveFile.pantiesTurnedIn.Add(284); saveFile.girls[8].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"])) { saveFile.pantiesTurnedIn.Add(285); saveFile.girls[9].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["momo_enabled"])) { saveFile.pantiesTurnedIn.Add(286); saveFile.girls[10].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["celeste_enabled"])) { saveFile.pantiesTurnedIn.Add(287); saveFile.girls[11].gotPanties = true; }
+                if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["venus_enabled"])) { saveFile.pantiesTurnedIn.Add(288);saveFile.girls[12].gotPanties = true; }
 
                 //set starting girl and starting location to be bedroom
                 saveFile.currentGirl = Convert.ToInt32(Plugin.curse.connected.slot_data["start_girl"]);
