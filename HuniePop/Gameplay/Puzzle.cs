@@ -24,15 +24,15 @@ namespace HuniePopArchiepelagoClient.HuniePop.Gameplay
                 {
                     Plugin.curse.sendLoc(42069013 + ((girlData.GetGirlDefinition().id - 1) * 4));
                 }
-                else if (girlData.relationshipLevel >= 2)
+                if (girlData.relationshipLevel >= 2)
                 {
                     Plugin.curse.sendLoc(42069014 + ((girlData.GetGirlDefinition().id - 1) * 4));
                 }
-                else if (girlData.relationshipLevel >= 3)
+                if (girlData.relationshipLevel >= 3)
                 {
                     Plugin.curse.sendLoc(42069015 + ((girlData.GetGirlDefinition().id - 1) * 4));
                 }
-                else if (girlData.relationshipLevel >= 4)
+                if (girlData.relationshipLevel >= 4)
                 {
                     Plugin.curse.sendLoc(42069016 + ((girlData.GetGirlDefinition().id - 1) * 4));
                 }
