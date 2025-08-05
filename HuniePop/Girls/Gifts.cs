@@ -33,7 +33,122 @@ namespace HuniePopArchiepelagoClient.HuniePop.Girls
                 Plugin.curse.sendLoc(item.id - 277 + 42069493);
             }
 
-            if (GameManager.System.Player.pantiesTurnedIn.Count >= 12) { Plugin.curse.sendCompletion(); }
+            GirlDefinition g = null;
+            if (GameManager.System.Location.currentGirl != null && GameManager.System.Location.IsLocationSettled())
+            {
+                g = GameManager.Stage.girl.definition;
+            }
+
+            if (!Convert.ToBoolean(Plugin.curse.connected.slot_data["kyu_enabled"]))
+            {
+                switch (item.id)
+                {
+                    case 0:
+                        break;
+                    case 277:
+                        //Tiffany's Panties
+                        if (g.id == 1)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 278:
+                        //Aiko's Panties
+                        if (g.id == 2)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 279:
+                        //Kyanna's Panties
+                        if (g.id == 3)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 280:
+                        //Audrey's Panties
+                        if (g.id == 4)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 281:
+                        //Lola's Panties
+                        if (g.id == 5)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 282:
+                        //Nikki's Panties
+                        if (g.id == 6)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 283:
+                        //Jessie's Panties
+                        if (g.id == 7)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 284:
+                        //Beli's Panties
+                        if (g.id == 8)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 285:
+                        //Kyu's Panties
+                        if (g.id == 9)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 286:
+                        //Momo's Panties
+                        if (g.id == 10)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 287:
+                        //Celeste's Panties
+                        if (g.id == 11)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    case 288:
+                        //Venus' Panties
+                        if (g.id == 12)
+                        {
+                            __instance.TriggerDialog(GameManager.Stage.uiGirl.givenGiftDialogTrigger, 0, false, -1);
+                            __result = true;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                if (GameManager.System.Player.pantiesTurnedIn.Count >= 12) { Plugin.curse.sendCompletion(); }
+            }
         }
 
         /// <summary>

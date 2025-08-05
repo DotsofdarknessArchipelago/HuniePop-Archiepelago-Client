@@ -14,7 +14,6 @@ BACKUP YOUR SAVE FILE BEFORE USING THIS AS I CANT GUARANTEE THAT IT WILL NOT COR
 INSTALLATION INSTRUCTIONS:
 
 - Have Hunie Pop Installed
-- Download/install "Microsoft Visual C++ Redistributable x86" version 14.42.34433.0 or greater [link](https://aka.ms/vs/17/release/vc_redist.x86.exe)
 - Download Hunie Pop Archipelago plugin (See Releases for latest version)
 - Extract and copy the contents of "Hunie Pop Archipelago plugin.zip" to the directory where "HuniePop.exe" is if it asks you to overwrite files click yes
 
